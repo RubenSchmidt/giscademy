@@ -87,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'demogis.wsgi.application'
+WSGI_APPLICATION = 'giscademy.wsgi.application'
 
 
 # Database
