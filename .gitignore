@@ -1,0 +1,15 @@
+
+# Created by https://www.gitignore.io/api/dn,django
+
+#!! ERROR: dn is undefined. Use list command to see defined gitignore types !!#
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media
+.idea/
+data/
