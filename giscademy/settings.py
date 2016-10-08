@@ -92,15 +92,17 @@ WSGI_APPLICATION = 'giscademy.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
+database_name = os.environ.get('DATABASE_NAME', 'demogis')
 database_host = os.environ.get('DATABASE_HOST', 'localhost')
+database_user = os.environ.get('DATABASE_USER', 'demogisuser')
+database_password = os.environ.get('DATABASE_PASSWORD', 'password')
 
 DATABASES = {
     'default': {
          'ENGINE': 'django.contrib.gis.db.backends.postgis',
-         'NAME': 'demogis',
-         'USER': 'demogisuser',
-         'PASSWORD': 'password',
+         'NAME': database_name,
+         'USER': database_user,
+         'PASSWORD': database_password,
          'HOST': database_host,
          'PORT': '5432',
         }

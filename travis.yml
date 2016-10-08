@@ -1,0 +1,33 @@
+#   A basic travis.yml boilerplate for Django projects
+#
+#   The set-up assumes a postgreSQL database.
+#
+#   Replace the following variables in the code:
+# * your_project_settings
+# * your_github_username
+# * your_repo
+
+language: python
+
+python:
+  - 3.5
+
+services: postgresql
+
+env:
+  - DATABASE_NAME=travis
+  - DATABASE_USER=postgres
+  - DATABASE_PASSWORD=''
+
+
+before_install:
+  - export DJANGO_SETTINGS_MODULE=giscademy.settings
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c "CREATE DATABASE travis;" -U postgres
+
+script:
+  - python manage.py migrate
