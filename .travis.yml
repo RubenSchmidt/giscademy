@@ -15,9 +15,7 @@ python:
 services: postgresql
 
 env:
-  - DATABASE_NAME=travis
-  - DATABASE_USER=postgres
-  - DATABASE_PASSWORD=''
+  - DATABASE_NAME=travis DATABASE_USER=postgres DATABASE_PASSWORD=''
 
 
 before_install:
