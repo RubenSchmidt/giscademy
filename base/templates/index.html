@@ -1,13 +1,41 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <section class="hero is-info is-fullheight">
+    <section class="hero is-primary is-fullheight">
+        <!-- Hero header: will stick at the top -->
+        <div class="hero-head">
+            <header class="nav">
+                <div class="container">
+                    <div class="nav-left">
+                        <a class="nav-item">
+                            <span>GIScademy</span>
+                        </a>
+                    </div>
+                    <span class="nav-toggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                    <span class="nav-item">
+                        <a href="{% url 'login' %}" class="button is-light is-outlined">
+                            <span>Log in</span>
+                        </a>
+                    </span>
+                    <span class="nav-item">
+                        <a href="{% url 'register' %}" class="button is-info is-inverted">
+                            <span>Sign up</span>
+                        </a>
+                    </span>
+                    </div>
+                </div>
+            </header>
+        </div>
         <div class="hero-body">
             <div class="container">
                 <div class="tile is-ancestor">
                     <div class="tile is-4 is-vertical is-parent">
                         <div class="tile is-child">
-                            <h1 class="title">One</h1>
+                            <h1 class="title">Learn basic GIS operations</h1>
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu
                                 pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis
                                 feugiat facilisis.</p>
