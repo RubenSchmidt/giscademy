@@ -1,5 +1,9 @@
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
-from .models import ByggFlate
+from .models import FKBLayer
 
-admin.site.register(ByggFlate, OSMGeoAdmin)
+
+@admin.register(FKBLayer)
+class FKBLayerAdmin(OSMGeoAdmin):
+    list_display = ['objtype']
+    list_filter = ['objtype']
