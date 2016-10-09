@@ -1,13 +1,10 @@
 from django.contrib.gis.db.models import MultiPolygonField
 from django.db import models
 
+from giscademy.utils.model_utils import Timestampable
 
-class FKBLayer(models.Model):
+
+class Layer(Timestampable):
     objtype = models.CharField(max_length=32)
     geom = MultiPolygonField(srid=32632)
 
-# Auto-generated `LayerMapping` dictionary for ByggFlate model
-fkblayer_mapping = {
-    'objtype' : 'OBJTYPE',
-    'geom' : 'MULTIPOLYGON25D',
-}
