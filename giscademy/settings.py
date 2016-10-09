@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'channels',
 
     # Own
-    'base'
+    'base',
+    'layers'
 ]
 
 MIDDLEWARE = [
