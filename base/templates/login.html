@@ -3,39 +3,63 @@
 {% block title %}Logg inn{% endblock %}
 
 {% block content %}
-  <section class="hero is-fullheight is-light is-bold">
+    <section class="hero is-fullheight is-light is-bold">
 
-    <div class="hero-body">
-      <div class="container">
-        <div class="columns is-vcentered">
-          <div class="column is-4 is-offset-4">
-            <h1 class="title">
-              Login
-            </h1>
-            <div class="box">
-              <label class="label">Email</label>
-              <p class="control">
-                <input class="input" type="text" placeholder="jsmith@example.org">
-              </p>
-              <label class="label">Password</label>
-              <p class="control">
-                <input class="input" type="password" placeholder="●●●●●●●">
-              </p>
-              <hr>
-              <p class="control">
-                <button class="button is-primary">Login</button>
-                <a href="{% url 'index' %}" class="button is-default">Cancel</a>
-              </p>
+        <div class="hero-body">
+            <div class="container">
+                <div class="columns is-vcentered">
+                    <div class="column is-4 is-offset-4">
+                        <h1 class="title">
+                            Login
+                        </h1>
+                        <div class="box">
+                            <form method="post" action="{% url 'login' %}">
+                                {% csrf_token %}
+                                <label class="label">Email</label>
+                                {% if form.username.errors %}
+                                    <p class="control has-icon has-icon-right">
+                                        <input class="input is-danger" name="username" id="id_username" type="text"
+                                               placeholder="jsmith@example.org">
+                                        <i class="fa fa-warning"></i>
+                                        <span class="help is-danger">{{ form.username.errors.0 }}</span>
+                                    </p>
+                                {% else %}
+                                    <p class="control">
+                                        <input class="input" name="username" id="id_username" type="text"
+                                               placeholder="jsmith@example.org">
+                                    </p>
+                                {% endif %}
+                                <label class="label">Password</label>
+                                {% if form.password.errors %}
+                                    <p class="control has-icon has-icon-right">
+                                        <input class="input is-danger" name="password" id="id_password" type="password"
+                                               placeholder="●●●●●●●">
+                                        <i class="fa fa-warning"></i>
+                                        <span class="help is-danger">{{ form.password.errors.0 }}</span>
+                                    </p>
+                                {% else %}
+                                    <p class="control">
+                                        <input class="input" id="id_password" name="password" type="password" placeholder="●●●●●●●">
+                                    </p>
+                                {% endif %}
+                                <span class="help is-danger">{{ form.non_field_errors.0 }}</span>
+                                <hr>
+                                <p class="control">
+                                    <button type="submit" class="button is-primary">Login</button>
+                                    <a href="{% url 'index' %}" class="button is-default">Cancel</a>
+                                </p>
+                            </form>
+                        </div>
+                        <p class="has-text-centered">
+
+                            <a href="{% url 'register' %}">Register an Account</a>
+                            |
+                            <a href="#">Forgot password</a>
+                        </p>
+                    </div>
+                </div>
             </div>
-            <p class="has-text-centered">
-              <a href="{% url 'register' %}">Register an Account</a>
-              |
-              <a href="#">Forgot password</a>
-            </p>
-          </div>
         </div>
-      </div>
-    </div>
 
-  </section>
+    </section>
 {% endblock content %}

@@ -16,6 +16,16 @@
                         <span></span>
                         <span></span>
                     </span>
+                    {% if request.user.is_authenticated %}
+                        <span class="nav-item">
+                            {{ request.user.username }}
+                        </span>
+                        <span class="nav-item">
+                        <a href="{% url 'logout' %}" class="button is-light is-outlined">
+                            <span>Log out</span>
+                        </a>
+                    </span>
+                    {% else %}
                     <span class="nav-item">
                         <a href="{% url 'login' %}" class="button is-light is-outlined">
                             <span>Log in</span>
@@ -26,6 +36,7 @@
                             <span>Sign up</span>
                         </a>
                     </span>
+                    {% endif %}
                     </div>
                 </div>
             </header>
@@ -47,7 +58,7 @@
                                 feugiat facilisis.</p>
                         </div>
                     </div>
-                    <div class="tile is-parent">
+                    <div class="tile is-parent box">
                         <div class="tile is-child" id="map">
 
                         </div>

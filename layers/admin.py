@@ -1,9 +1,21 @@
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
-from .models import Layer
-
+from .models import Layer, Polygon, Point, LineString
 
 @admin.register(Layer)
-class LayerAdmin(OSMGeoAdmin):
-    list_display = ['objtype']
-    list_filter = ['objtype']
+class LayerAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Polygon)
+class PolygonAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Point)
+class PointAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(LineString)
+class LineStringAdmin(admin.ModelAdmin):
+    pass
