@@ -11,7 +11,17 @@ from django.views import View
 from layers.models import Layer, Point, Polygon
 
 
+class SandboxView(View):
+    template_name = 'sandbox.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+
 class ImportGeoJsonView(View):
+    """
+    Add geojson layers.
+    """
     template_name = 'import_geojson.html'
 
     def get(self, request):
