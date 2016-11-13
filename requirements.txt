@@ -9,6 +9,7 @@ incremental==16.10.1
 msgpack-python==0.4.8
 psycopg2==2.6.2
 redis==2.10.5
+serpy==0.1.1
 six==1.10.0
 Twisted==16.5.0
 txaio==2.5.2

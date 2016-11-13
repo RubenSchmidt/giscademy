@@ -32,3 +32,10 @@ class RegistrationView(View):
             login(request, user)
             return HttpResponseRedirect('/')
         return render(request, self.template_name, {'form': form})
+
+
+class SandboxView(View):
+    template_name = 'sandbox.html'
+
+    def get(self, request):
+        return render(request, self.template_name)

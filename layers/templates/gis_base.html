@@ -11,14 +11,15 @@
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.2.1/css/bulma.min.css"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css"/>
-    <link rel="stylesheet" href="{% static 'css/leaflet-sidebar.min.css' %}"/>
 
     {% block style %}{% endblock style %}
 </head>
 <body>
 {% block content %}{% endblock %}
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-resource@1.0.3/dist/vue-resource.min.js"></script>
+
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
-<script src="{% static 'js/leaflet-sidebar.min.js' %}"></script>
 {% block js %}{% endblock %}
 </body>
 </html>

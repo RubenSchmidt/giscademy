@@ -1,0 +1,88 @@
+{% extends 'gis_base.html' %}
+{% block style %}
+    <style>
+        html, body, #app, #map {
+            height: 100%;
+        }
+
+        .aside {
+            padding: 20px;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+    </style>
+{% endblock style %}
+{% block content %}
+    <div id="app">
+        <div class="columns">
+            <div class="column aside is-2 menu hero is-fullheight is-hidden-mobile">
+                <div class="main" v-cloak>
+                    <p class="menu-label">
+                        General
+                    </p>
+                    <ul class="menu-list">
+                        <li><a href="#">Dashboard</a></li>
+                        <li><a href="#">Customers</a></li>
+                    </ul>
+                    <p class="menu-label">
+                        Administration
+                    </p>
+                    <ul class="menu-list">
+                        <li><a href="#">Team Settings</a></li>
+                        <li><a @click="toggleMenuItem" class="is-active" href="#">Predefined layers</a>
+                            <ul v-show="isMenuOpen">
+                                <li v-for="layer in layers"><a href="#">[[layer.name]]</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Invitations</a></li>
+                        <li><a href="#">Authentication</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="column is-10">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block js %}
+    <script>
+        var vue = new Vue({
+            el: '#app',
+            delimiters: ["[[", "]]"],
+            data: {
+                message: 'Hello Vue.js!',
+                isMenuOpen: false,
+                layers: [],
+            },
+            created:function(){
+                this.fetchData();
+            },
+            methods: {
+                fetchData: function () {
+                    this.$http.get('/layers/').then(function (response) {
+                                this.layers = response.body;
+                            }, this.handleError)
+                },
+                toggleMenuItem: function () {
+                    this.isMenuOpen = !this.isMenuOpen;
+
+                },
+                handleError: function () {
+
+                }
+            }
+        });
+    </script>
+    <script>
+        var map = L.map('map').setView([63.446827, 10.421906], 10);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+    </script>
+{% endblock %}

@@ -1,8 +1,8 @@
 from django.conf.urls import url
 
-from .views import ImportGeoJsonView, SandboxView
+from .views import ImportGeoJsonView, LayerListView
 
 urlpatterns = [
     url(r'^import-geojson/$', ImportGeoJsonView.as_view(), name='import-geojson'),
-    url(r'^sandbox/$', SandboxView.as_view(), name='sandbox'),
+    url(r'^$', LayerListView.as_view(), name='layer-list'),
 ]

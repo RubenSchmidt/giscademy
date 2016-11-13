@@ -7,4 +7,6 @@ urlpatterns = [
     url(r'^login/$', auth_views.login, {'template_name': 'login.html'}, name='login'),
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^register/$', views.RegistrationView.as_view(), name='register'),
+    url(r'^sandbox/$', views.SandboxView.as_view(), name='sandbox'),
+
 ]

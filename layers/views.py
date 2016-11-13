@@ -1,21 +1,21 @@
-import json
-
-from django.contrib.gis import geos
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, GeometryCollection
+from django.contrib.gis.geos import MultiPolygon
+from django.core.serializers import serialize
+from django.http import JsonResponse
 from django.shortcuts import render
 
 # Create your views here.
 from django.views import View
 
 from layers.models import Layer, Point, Polygon
+from layers.serializers import LayerSerializer
 
 
-class SandboxView(View):
-    template_name = 'sandbox.html'
-
+class LayerListView(View):
     def get(self, request):
-        return render(request, self.template_name)
+        layers = Layer.objects.all()
+        data = LayerSerializer(layers, many=True).data
+        return JsonResponse(data=data, safe=False)
 
 
 class ImportGeoJsonView(View):
