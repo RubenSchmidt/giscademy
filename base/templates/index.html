@@ -1,71 +1,72 @@
 {% extends 'base.html' %}
-
+{% block style %}
+    <style>
+        #map {
+            height: 400px;
+        }
+    </style>
+{% endblock %}
 {% block content %}
     <section class="hero is-primary is-fullheight">
-        <!-- Hero header: will stick at the top -->
-        <div class="hero-head">
-            <header class="nav">
-                <div class="container">
-                    <div class="nav-left">
-                        <a class="nav-item">
-                            <span>GIScademy</span>
-                        </a>
-                    </div>
-                    <span class="nav-toggle">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-                    {% if request.user.is_authenticated %}
-                        <span class="nav-item">
-                            {{ request.user.username }}
-                        </span>
-                        <span class="nav-item">
-                        <a href="{% url 'logout' %}" class="button is-light is-outlined">
-                            <span>Log out</span>
-                        </a>
-                    </span>
-                    {% else %}
-                    <span class="nav-item">
-                        <a href="{% url 'login' %}" class="button is-light is-outlined">
-                            <span>Log in</span>
-                        </a>
-                    </span>
-                    <span class="nav-item">
-                        <a href="{% url 'register' %}" class="button is-info is-inverted">
-                            <span>Sign up</span>
-                        </a>
-                    </span>
-                    {% endif %}
-                    </div>
-                </div>
-            </header>
-        </div>
         <div class="hero-body">
             <div class="container">
                 <div class="tile is-ancestor">
-                    <div class="tile is-4 is-vertical is-parent">
+                    <div class="tile is-6 is-vertical is-parent">
                         <div class="tile is-child">
                             <h1 class="title">Learn basic GIS operations</h1>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu
-                                pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis
-                                feugiat facilisis.</p>
-                        </div>
-                        <div class="tile is-child">
-                            <h1 class="title">Two</h1>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu
-                                pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis
-                                feugiat facilisis.</p>
+                            <p>Go through interactive tutorials and learn the basic GIS operations!</p>
                         </div>
                     </div>
-                    <div class="tile is-parent box">
-                        <div class="tile is-child" id="map">
-
+                    <div class="tile is-4 is-parent" >
+                        <div class="tile is-child">
+                            <h1 class="title">Register today!</h1>
+                            <div class="box">
+                            <form method="post" action="{% url 'index' %}">
+                            {% csrf_token %}
+                                <label class="label">Email</label>
+                                <p class="control">
+                                    <input class="input" name="username" type="text" placeholder="jsmith@example.org">
+                                </p>
+                                <hr>
+                                <label class="label">Password</label>
+                                <p class="control">
+                                    <input class="input" name="password1" type="password" placeholder="●●●●●●●">
+                                </p>
+                                <label class="label">Confirm Password</label>
+                                <p class="control">
+                                    <input class="input" name="password2" type="password" placeholder="●●●●●●●">
+                                </p>
+                                <hr>
+                                <p class="control">
+                                    <button type="submit" class="button is-primary">Register</button>
+                                    <button class="button is-default">Cancel</button>
+                                </p>
+                            </form>
+                            <span class="help is-danger">{{ form.non_field_errors.0 }}</span>
+                        </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
+    <section class="hero is-fullheight">
+        <div class="hero-body">
+            <div class="container">
+                <div class="tile is-4 is-vertical is-parent">
+                    <div class="tile is-child">
+                        <h1 class="title">Sandbox</h1>
+                        <p>Use the sandbox GIS to learn by yourself!</p>
+                    </div>
+                </div>
+                <div class="tile is-parent box">
+                    <div class="tile is-child" id="map">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
 {% endblock %}
 
