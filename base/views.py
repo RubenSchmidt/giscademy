@@ -7,6 +7,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse
 from django.views.generic import FormView, View
 
+from courses.models import Course
+
 
 class IndexView(View):
     form_class = UserCreationForm
@@ -58,8 +60,8 @@ class LearnView(View):
     template_name = 'learn.html'
 
     def get(self, request):
-        return render(request, self.template_name)
-
+        courses = Course.objects.all()
+        return render(request, self.template_name, {'courses': courses})
 
 class SandboxView(View):
     template_name = 'sandbox.html'

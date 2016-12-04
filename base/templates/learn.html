@@ -1,5 +1,46 @@
 {% extends 'base.html' %}
-
+{% block style %}
+    <style>
+        .has-navbar {
+            margin-top: 50px;
+        }
+    </style>
+{% endblock %}
 {% block content %}
-
+    <div class="container has-navbar">
+        <div class="columns">
+            <div class="column">
+                <h1 class="title">Courses</h1>
+            </div>
+        </div>
+        {% for course in courses %}
+            <div class="box">
+                <article class="media">
+                    <div class="media-content">
+                        <div class="content">
+                            <p>
+                                <strong>{{ course.title }}</strong>
+                                <br>
+                                {{ course.overview }}
+                            </p>
+                        </div>
+                        <progress class="progress is-primary" value="{{ course.progress }}" max="100">30%</progress>
+                        <nav class="level">
+                            <div class="level-left">
+                                <a class="level-item">
+                                    <span class="icon is-small"><i class="fa fa-reply"></i></span>
+                                </a>
+                                <a class="level-item">
+                                    <span class="icon is-small"><i class="fa fa-retweet"></i></span>
+                                </a>
+                                <a class="level-item">
+                                    <span class="icon is-small"><i class="fa fa-heart"></i></span>
+                                </a>
+                            </div>
+                        </nav>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
