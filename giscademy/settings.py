@@ -46,7 +46,8 @@ INSTALLED_APPS = [
 
     # Own
     'base',
-    'layers'
+    'layers',
+    'courses'
 ]
 
 MIDDLEWARE = [

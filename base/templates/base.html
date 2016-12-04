@@ -17,7 +17,7 @@
 <body>
 <nav class="nav has-shadow">
     <div class="nav-left">
-        <a class="nav-item is-brand" href="#">
+        <a class="nav-item is-brand" href="/">
             <img src="{% static 'img/giscademy.png' %}" alt="giscademy logo">
         </a>
     </div>
@@ -26,6 +26,7 @@
         <span></span>
         <span></span>
     </span>
+    {% if request.user.is_authenticated %}
     <span class="nav-item">
     {{ request.user.username }}
     </span>
@@ -34,6 +35,7 @@
     <span>Log out</span>
     </a>
     </span>
+    {% else %}
     <span class="nav-item">
     <a href="{% url 'login' %}" class="button is-primary is-outlined">
     <span>Log in</span>
@@ -44,6 +46,7 @@
     <span>Sign up</span>
     </a>
     </span>
+    {% endif %}
 </nav>
 {% block content %}{% endblock %}
 <footer class="footer">
