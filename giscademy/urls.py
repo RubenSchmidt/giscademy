@@ -19,5 +19,6 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('base.urls')),
+    url(r'^courses/', include('courses.urls')),
     url(r'^layers/', include('layers.urls')),
 ]

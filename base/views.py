@@ -1,24 +1,12 @@
 from django.contrib.auth import logout, login
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
-
-# Create your views here.
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.utils.decorators import method_decorator
-from django.views.generic import FormView, View
+from django.views.generic import View
 
 from courses.models import Course
-
-
-@method_decorator(login_required, name='dispatch')
-class ProtectedView(View):
-    """
-    Mixin for decorating the dispatch function with login_required decorator
-    """
-    pass
+from giscademy.utils.view_utils import ProtectedView
 
 
 class IndexView(View):
@@ -68,12 +56,21 @@ class RegistrationView(View):
 
 
 class LearnView(ProtectedView):
-    template_name = 'learn.html'
+    template_name = 'learn/learn.html'
 
     def get(self, request):
         user = request.user
         courses = Course.objects.filter(enrollment__user=user)
         return render(request, self.template_name, {'courses': courses})
+
+
+class CourseDetailView(ProtectedView):
+    template_name = 'learn/course_detail.html'
+
+    def get(self, request, slug):
+        course = get_object_or_404(Course, slug=slug)
+        lessons = course.lessons.all().order_by('order')
+        return render(request, self.template_name, {'course': course, 'lessons': lessons})
 
 
 class CatalogView(ProtectedView):
@@ -106,7 +103,7 @@ class CatalogView(ProtectedView):
 
 
 class SandboxView(View):
-    template_name = 'sandbox.html'
+    template_name = 'exercise_detail.html'
 
     def get(self, request):
         return render(request, self.template_name)

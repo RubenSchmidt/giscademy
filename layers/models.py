@@ -8,6 +8,22 @@ from giscademy.utils.model_utils import Timestampable
 class Layer(Timestampable):
     name = models.CharField(max_length=255)
     json = JSONField(blank=True)
+    exercise = models.ForeignKey('courses.Exercise', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def points(self):
+        return self.point_set.all()
+
+    @property
+    def linestrings(self):
+        return self.linestring_set.all()
+
+    @property
+    def polygons(self):
+        return self.polygon_set.all()
 
 
 class Feature(Timestampable):

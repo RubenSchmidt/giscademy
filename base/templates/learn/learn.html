@@ -33,6 +33,7 @@
             <div class="box">
                 <article class="media">
                     <div class="media-content">
+                        <a href="{% url 'learn-course-detail' course.slug %}">
                         <div class="content">
                             <p>
                                 <strong>{{ course.title }}</strong>
@@ -40,6 +41,7 @@
                                 {{ course.overview }}
                             </p>
                         </div>
+                         </a>
                         <progress class="progress is-primary" value="{{ course.progress }}" max="100">30%</progress>
                         <nav class="level">
                             <div class="level-left">
@@ -60,10 +62,10 @@
                             </div>
                         </nav>
                     </div>
+
                 </article>
             </div>
         {% endfor %}
-
     </div>
 </section>
 {% endblock %}

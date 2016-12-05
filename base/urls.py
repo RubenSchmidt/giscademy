@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^register/$', views.RegistrationView.as_view(), name='register'),
     url(r'^sandbox/$', views.SandboxView.as_view(), name='sandbox'),
     url(r'^learn/$', views.LearnView.as_view(), name='learn'),
-    url(r'^learn/(?P<slug>[-\w]+)/$', views.LearnView.as_view(), name='learn-course-detail'),
+    url(r'^learn/(?P<slug>[-\w]+)/$', views.CourseDetailView.as_view(), name='learn-course-detail'),
     url(r'^catalog/$', views.CatalogView.as_view(), name='catalog'),
 
 ]

@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.text import slugify
@@ -39,6 +38,7 @@ class Course(SlugTitleable):
 class Lesson(SlugTitleable):
     course = models.ForeignKey('courses.Course', related_name='lessons')
     overview = models.TextField()
+    order = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.title
@@ -46,6 +46,7 @@ class Lesson(SlugTitleable):
 
 class Exercise(SlugTitleable):
     lesson = models.ForeignKey('courses.Lesson')
+    order = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.title
@@ -54,3 +55,4 @@ class Exercise(SlugTitleable):
 class Enrollment(models.Model):
     user = models.ForeignKey('auth.User')
     course = models.ForeignKey('courses.Course')
+

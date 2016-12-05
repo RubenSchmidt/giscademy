@@ -43,6 +43,8 @@ INSTALLED_APPS = [
 
     # Third party
     'channels',
+    'rest_framework',
+    'rest_framework_gis',
 
     # Own
     'base',

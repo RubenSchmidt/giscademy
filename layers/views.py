@@ -18,6 +18,13 @@ class LayerListView(View):
         return JsonResponse(data=data, safe=False)
 
 
+class ExerciseLayersListView(View):
+    def get(self, request, exercise_slug):
+        layers = Layer.objects.filter(exercise__slug=exercise_slug)
+        data = LayerSerializer(layers, many=True).data
+        return JsonResponse(data=data, safe=False)
+
+
 class ImportGeoJsonView(View):
     """
     Add geojson layers.
