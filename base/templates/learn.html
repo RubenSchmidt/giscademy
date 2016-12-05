@@ -7,12 +7,28 @@
     </style>
 {% endblock %}
 {% block content %}
-    <div class="container has-navbar">
+<section class="section is-large">
+    <div class="container">
         <div class="columns">
+            <div class="column is-narrow">
+                <p class="title">
+                    Courses
+                </p>
+            </div>
             <div class="column">
-                <h1 class="title">Courses</h1>
+                <a class="button is-primary" href="{% url 'catalog' %}">All courses</a>
             </div>
         </div>
+        <div class="columns">
+            <div class="column">
+                {% if courses %}
+                    <p>Continue with your courses below, and become an expert GIS'er!</p>
+                {% else %}
+                    <p>You have not enrolled in any courses yet! Check out the catalog for some awesome stuff!</p>
+                {% endif %}
+            </div>
+        </div>
+
         {% for course in courses %}
             <div class="box">
                 <article class="media">
@@ -37,10 +53,17 @@
                                     <span class="icon is-small"><i class="fa fa-heart"></i></span>
                                 </a>
                             </div>
+                            <div class="level-right">
+                                <a class="level-item button is-primary">
+                                    Continue
+                                </a>
+                            </div>
                         </nav>
                     </div>
                 </article>
             </div>
         {% endfor %}
+
     </div>
+</section>
 {% endblock %}

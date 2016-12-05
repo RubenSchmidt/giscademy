@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block style %}
+{% endblock %}
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="nav">
+                <div class="nav-left">
+                    <a href="{% url 'catalog' %}" class="nav-item is-tab {% if request.get_full_path == '/catalog/' %} is-active {% endif %}">
+                        All courses
+                    </a>
+                    <a href="?courses=easy" class="nav-item is-tab {% if request.GET.courses == 'easy' %} is-active {% endif %}">
+                        Easy
+                    </a>
+                    <a href="?courses=medium" class="nav-item is-tab {% if request.GET.courses == 'medium' %} is-active {% endif %}">
+                        Medium
+                    </a>
+                    <a href="?courses=expert"  class="nav-item is-tab {% if request.GET.courses == 'expert' %} is-active {% endif %}">
+                        Expert
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <div class="container">
+                {% for course in courses %}
+                    <div class="box">
+                        <article class="media">
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <strong>{{ course.title }}</strong>
+                                        <br>
+                                        {{ course.overview }}
+                                    </p>
+                                </div>
+
+                                {% if course.user_is_enrolled %}
+                                    <progress class="progress is-primary" value="{{ course.progress }}" max="100">30%</progress>
+                                {% endif %}
+
+                                <nav class="level">
+                                    <div class="level-left">
+                                        <p>Difficulty: {{ course.difficulty }}</p>
+                                    </div>
+                                    <div class="level-right">
+                                        {% if not course.user_is_enrolled %}
+                                        <form action="{% url 'catalog' %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="course_id" value="{{ course.id }}">
+                                            <button type="submit" class="level-item button is-primary">
+                                                Enroll
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <a href="" class="button is-primary">Continue</a>
+                                        {% endif %}
+                                    </div>
+                                </nav>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+        </div>
+    </section>
+{% endblock %}
