@@ -9,15 +9,15 @@ class LayerAdmin(admin.ModelAdmin):
 
 
 @admin.register(Polygon)
-class PolygonAdmin(admin.ModelAdmin):
+class PolygonAdmin(OSMGeoAdmin):
     pass
 
 
 @admin.register(Point)
-class PointAdmin(admin.ModelAdmin):
+class PointAdmin(OSMGeoAdmin):
     pass
 
 
 @admin.register(LineString)
-class LineStringAdmin(admin.ModelAdmin):
+class LineStringAdmin(OSMGeoAdmin):
     pass
