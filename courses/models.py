@@ -47,12 +47,17 @@ class Lesson(SlugTitleable):
 class Exercise(SlugTitleable):
     lesson = models.ForeignKey('courses.Lesson')
     order = models.PositiveSmallIntegerField(default=0)
+    description = models.TextField()
 
     def __str__(self):
         return self.title
 
 
+class Instruction(models.Model):
+    description = models.TextField()
+    order = models.PositiveSmallIntegerField(default=0)
+
+
 class Enrollment(models.Model):
     user = models.ForeignKey('auth.User')
     course = models.ForeignKey('courses.Course')
-

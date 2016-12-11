@@ -70,6 +70,7 @@
             },
             methods: {
                 fetchData: function () {
+                    // Fetch the predefined data for the current exercise.
                     this.$http.get('/layers/' + exerciseSlug).then(function (response) {
                         this.handleResponse(response);
                     }, this.handleError)
