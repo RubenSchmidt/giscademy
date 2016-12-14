@@ -1,68 +1,126 @@
-{% extends 'gis_base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 {% block style %}
     <style>
-        html, body, #app, #map {
+        #map {
             height: 100%;
         }
 
-        .aside {
-            padding: 20px;
+        #side-menu {
+            height: 100vh;
+            overflow-y: scroll;
         }
 
-        [v-cloak] {
-            display: none;
+        .container {
+            padding: 10px 0 10px 10px;
         }
 
     </style>
 {% endblock style %}
+{% block nav %}
+{% endblock %}
 {% block content %}
     <div id="app">
         <div class="columns">
-            <div class="column aside is-3 menu hero is-fullheight is-hidden-mobile">
-                <div class="main" v-cloak>
-                    <p class="menu-label">
-                        General
-                    </p>
-                    <ul class="menu-list">
-                        <li><a href="#">Dashboard</a></li>
-                        <li><a href="#">Customers</a></li>
-                    </ul>
-                    <p class="menu-label">
-                        Administration
-                    </p>
-                    <ul class="menu-list">
-                        <li><a href="#">Team Settings</a></li>
-                        <li><a @click="toggleMenuItem" class="is-active" href="#">Predefined layers</a>
-                            <ul v-show="isMenuOpen">
-                                <li v-for="layer in layers"><a href="#">[[layer.name]]</a></li>
-                            </ul>
-                        </li>
+            <div id="side-menu" class="column is-3 hero is-fullheight is-hidden-mobile" v-cloak>
+                <div class="container">
+                    <nav class="level">
+                        <p class="level-item has-text-centered">
+                            <a class="button is-primary is-disabled">
+                                Back
+                            </a>
+                        </p>
+                        <p class="level-item has-text-centered">
+                            {{ exercise.order }} / {{ exercise_count }}
+                        </p>
+                        <p class="level-item has-text-centered">
+                            <a @click="bufferSelectedFeatures" class="button is-primary">
+                                Next
+                            </a>
+                        </p>
+                    </nav>
 
-                    </ul>
+                    <div class="panel">
+                        <div class="panel-heading">
+                            Learn
+                        </div>
+                        <div class="panel-block">
+                            <div class="content">
+                                {{ exercise.description | safe }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-heading">
+                            Instructions
+                        </div>
+                        <div class="panel-block">
+                            {% for instruction in instructions %}
+                                <div class="level">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <span class="icon">
+                                                <i class="fa fa-check-square-o"></i>
+                                            </span>
+                                        </div>
+                                        <div class="level-item">
+                                            <p>
+                                                {{ instruction.order }}. {{ instruction.description }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-heading">
+                            Selected features
+                        </div>
+                        <div class="panel-block" v-for="feature in selectedFeatures">
+                            <p>Id: [[ feature.id ]] Type: [[feature.geometry.type ]]</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="column is-10">
+            <div class="column is-8 is-paddingless">
                 <div id="map"></div>
+            </div>
+            <div class="column is-2">
+
             </div>
         </div>
     </div>
-
 {% endblock content %}
+
+{# Override the footer so we can render it empty #}
+{% block footer %}
+{% endblock %}
 {% block js %}
+    <script src="https://npmcdn.com/@turf/turf@3.5.1/turf.min.js"></script>
     <script>
         var exerciseSlug = "{{ exercise.slug }}";
+        // Set the center for the map defined by the exercise.
+        var map_center_lat = {{ map_center_lat }};
+        var map_center_lng = {{ map_center_lng }};
 
         var vue = new Vue({
             el: '#app',
             delimiters: ["[[", "]]"],
+            // Add the gisoperationsmixin so we can use the operations api.
+            mixins: [gisOperationsMixin],
             data: {
                 message: 'Hello Vue.js!',
                 isMenuOpen: false,
                 layers: [],
+                selectedFeatures: [],
+                lineStringLayer: null,
+                polygonLayer: null,
+                pointLayer: null,
                 map: null
             },
             mounted: function () {
-                this.map = L.map('map').setView([63.446827, 10.421906], 10);
+                this.map = L.map('map').setView([map_center_lat, map_center_lng], 13);
                 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(this.map);
@@ -71,20 +129,42 @@
             methods: {
                 fetchData: function () {
                     // Fetch the predefined data for the current exercise.
-                    this.$http.get('/layers/' + exerciseSlug).then(function (response) {
-                        this.handleResponse(response);
-                    }, this.handleError)
-                },
-                toggleMenuItem: function () {
-                    this.isMenuOpen = !this.isMenuOpen;
-
+                    this.$http.get('/layers/' + exerciseSlug).then(this.handleResponse, this.handleError)
                 },
                 handleError: function () {
 
                 },
                 handleResponse: function (response) {
                     this.layers = response.body;
-                    L.geoJSON(this.layers[0].points.features).addTo(this.map);
+                    this.pointLayer = L.geoJSON(this.layers[0].points.features, {onEachFeature: this.onEachFeature}).addTo(this.map);
+                    this.polygonLayer = L.geoJSON(this.layers[0].polygons.features, {onEachFeature: this.onEachFeature}).addTo(this.map);
+                    this.lineStringLayer = L.geoJSON(this.layers[0].linestrings.features, {onEachFeature: this.onEachFeature}).addTo(this.map);
+                },
+                onEachFeature: function (feature, layer) {
+                    //bind click
+                    layer.on({
+                        click: this.whenClicked
+                    });
+                },
+                whenClicked: function (e) {
+                    this.addOrRemoveFeatureFromList(e.target.feature);
+                },
+                addOrRemoveFeatureFromList: function (feature) {
+                    var index = this.selectedFeatures.indexOf(feature);
+                    if (index === -1){
+                        this.selectedFeatures.push(feature);
+                    }else {
+                        this.selectedFeatures.splice(index, 1);
+                    }
+                },
+                bufferSelectedFeatures: function () {
+                    this.bufferFeatures(this.selectedFeatures, 100).then(function (response) {
+                        var geojson = L.geoJSON(response.body, {onEachFeature: this.onEachFeature});
+                        geojson.addTo(this.map);
+                        this.map.fitBounds(geojson.getBounds());
+
+                    }, this.handleError);
+                    this.selectedFeatures = [];
                 },
             }
         });

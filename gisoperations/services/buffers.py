@@ -1,12 +1,16 @@
 import math
 
+from django.contrib.gis.gdal import DataSource
+
+from gisoperations.services import geojson
+
 UTM_NORTHERN_BASE = 32600
 UTM_SOUTHERN_BASE = 32700
 
 DEFAULT_MAP_SRID = 3857
 
 
-def get_utm_zone(point):
+def _get_utm_zone(point):
     """
     Guess the UTM zone ID for the supplied point
     """
@@ -18,7 +22,7 @@ def get_utm_zone(point):
     return int(1 + (lon + 180.0) / 6.0)
 
 
-def is_utm_northern(point):
+def _is_utm_northern(point):
     """
     Determine if the supplied point is in the northern or southern part
     for the UTM coordinate system.
@@ -28,7 +32,7 @@ def is_utm_northern(point):
     return lat >= 0.0
 
 
-def get_utm_srid(point):
+def _get_utm_srid(point):
     """
     Given the input point, guess the UTM zone and hemissphere and
     return the SRID for the UTM appropriate UTM zone.
@@ -36,15 +40,15 @@ def get_utm_srid(point):
     Note that this does not do any range checking, so supplying bogus
     points yields undefined results.
     """
-    utm_zone = get_utm_zone(point)
-    is_northern = is_utm_northern(point)
+    utm_zone = _get_utm_zone(point)
+    is_northern = _is_utm_northern(point)
     if is_northern:
         return UTM_NORTHERN_BASE + utm_zone
     else:
         return UTM_SOUTHERN_BASE + utm_zone
 
 
-def buffer_from_meters(geom, buffer_meters):
+def _buffer_from_meters(geom, buffer_meters):
     """
     Create a buffer around the supplied geometry
     with the specified distance.
@@ -60,7 +64,7 @@ def buffer_from_meters(geom, buffer_meters):
         # default to WGS84
         ref_point.srid = 4326
 
-    utm_srid = get_utm_srid(ref_point)
+    utm_srid = _get_utm_srid(ref_point)
     utm_point = ref_point.transform(utm_srid, clone=True)
 
     shift_distance = buffer_meters / math.sqrt(2.0)
@@ -101,7 +105,29 @@ def with_metric_buffer(geom, buffer_meters, map_srid=DEFAULT_MAP_SRID):
         map_geom = geom.transform(map_srid, clone=True)
     else:
         map_geom = geom
-    buf_size = buffer_from_meters(map_geom, buffer_meters)
-    buffered_geom = map_geom.buffer(buf_size)
+    buf_size = _buffer_from_meters(map_geom, buffer_meters)
+    buffered_geom = map_geom.buffer(buf_size, quadsegs=20)
     buffered_geom.transform(geom.srid)
     return buffered_geom
+
+
+def buffer_geojson(json, buffer_meters=100):
+    """
+    Buffer any geos geometry.
+    :param json: Input json
+    :param buffer_meters: Buffer size in meters
+    :return: FeatureCollection as a dict
+    """
+    ds = DataSource(json)
+    geoms = ds[0].get_geoms(geos=True)
+    features = []
+    for geom in geoms:
+        buffered = with_metric_buffer(geom, buffer_meters)
+        feature_dict = geojson.get_feature_dict(buffered)
+        features.append(feature_dict)
+    # Create a simple FeatureCollection with all the buffered geoms.
+    data = {
+        'type': 'FeatureCollection',
+        'features': features
+    }
+    return data

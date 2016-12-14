@@ -16,11 +16,16 @@
         [v-cloak] {
             display: none;
         }
+
+        .has-nav {
+            margin-top: 52px;
+        }
     </style>
 
     {% block style %}{% endblock style %}
 </head>
 <body>
+{% block nav %}
 <nav class="nav has-shadow">
     <div class="nav-left">
         <a class="nav-item is-brand" href="/">
@@ -66,7 +71,10 @@
     </div>
 
 </nav>
+{% endblock nav %}
 {% block content %}{% endblock %}
+
+{% block footer %}
 <footer class="footer">
     <div class="container">
         <div class="content has-text-centered">
@@ -83,10 +91,15 @@
         </div>
     </div>
 </footer>
+{% endblock %}
+<script>
+    var csrftoken = '{{ csrf_token }}';
+</script>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <script src="https://unpkg.com/vue-resource@1.0.3/dist/vue-resource.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 <script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="{% static 'js/operations.js' %}"></script>
 <script>
     // The following code is based off a toggle menu by @Bradcomp
     // source: https://gist.github.com/Bradcomp/a9ef2ef322a8e8017443b626208999c1

@@ -6,21 +6,26 @@ from rest_framework_gis import serializers
 from layers.models import Feature, Point, LineString, Polygon, Layer
 
 
-class PointSerializer(serializers.GeoFeatureModelSerializer):
+class BaseGeofeatureSerializer(serializers.GeoFeatureModelSerializer):
+    def get_properties(self, instance, fields):
+        return {'id': instance.id}
+
+
+class PointSerializer(BaseGeofeatureSerializer):
     class Meta:
         model = Point
         geo_field = 'geom'
-        fields = ['geom']
+        fields = ['geom', 'id']
 
 
-class LineStringSerializer(serializers.GeoFeatureModelSerializer):
+class LineStringSerializer(BaseGeofeatureSerializer):
     class Meta:
         model = LineString
         geo_field = 'geom'
         fields = ['geom']
 
 
-class PolygonSerializer(serializers.GeoFeatureModelSerializer):
+class PolygonSerializer(BaseGeofeatureSerializer):
     class Meta:
         model = Polygon
         geo_field = 'geom'
@@ -35,4 +40,3 @@ class LayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Layer
         fields = ['name', 'exercise', 'points', 'linestrings', 'polygons']
-

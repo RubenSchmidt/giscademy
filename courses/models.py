@@ -1,6 +1,10 @@
+from ckeditor.fields import RichTextField
 from django.contrib.auth.models import User
+from django.contrib.gis.db.models import PointField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import ugettext_lazy as _
 
 
 class SlugTitleable(models.Model):
@@ -47,13 +51,27 @@ class Lesson(SlugTitleable):
 class Exercise(SlugTitleable):
     lesson = models.ForeignKey('courses.Lesson')
     order = models.PositiveSmallIntegerField(default=0)
-    description = models.TextField()
+    description = RichTextField()
+    map_center = PointField(blank=True, null=True)
 
     def __str__(self):
         return self.title
 
 
+class UserExercise(models.Model):
+    """
+    Save the exercise status for a user.
+    """
+
+    exercise = models.ForeignKey('courses.Exercise')
+    user = models.ForeignKey('auth.User')
+    instructions_completed = models.ManyToManyField(
+        'courses.Instruction'
+    )
+
+
 class Instruction(models.Model):
+    exercise = models.ForeignKey('courses.Exercise', related_name='instructions')
     description = models.TextField()
     order = models.PositiveSmallIntegerField(default=0)
 

@@ -1,7 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from courses.models import Course, Lesson, Exercise, Enrollment
+from django.contrib.gis.admin import OSMGeoAdmin
+
+from courses.models import Course, Lesson, Exercise, Enrollment, Instruction
 
 
 @admin.register(Course)
@@ -15,10 +17,15 @@ class LessonAdmin(admin.ModelAdmin):
 
 
 @admin.register(Exercise)
-class ExerciseAdmin(admin.ModelAdmin):
+class ExerciseAdmin(OSMGeoAdmin):
     pass
 
 
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Instruction)
+class InstructionAdmin(admin.ModelAdmin):
     pass

@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^', include('base.urls')),
     url(r'^courses/', include('courses.urls')),
     url(r'^layers/', include('layers.urls')),
+    url(r'^gis-operations/', include('gisoperations.urls')),
 ]
