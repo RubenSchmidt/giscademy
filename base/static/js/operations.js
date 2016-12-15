@@ -5,10 +5,11 @@ Vue.http.headers.common['X-CSRFToken'] = csrftoken;
 
 var gisOperationsMixin = {
     methods: {
-        bufferFeatures: function (features, bufferMeters) {
+        bufferFeatures: function (features, extraArgs) {
             var data = {
                 'geojson': turf.featureCollection(features),
-                'meters': bufferMeters
+                'meters': extraArgs.size,
+                'name': extraArgs.name
             };
             return this.$http.post('/gis-operations/buffer/', data);
         }

@@ -11,18 +11,25 @@
             overflow-y: scroll;
         }
 
-        .container {
+        #side-menu .container {
             padding: 10px 0 10px 10px;
         }
+
+        #right-menu {
+            padding-top: 10px;
+        }
+    .not-active {
+        opacity: 0.5;
+    }
 
     </style>
 {% endblock style %}
 {% block nav %}
 {% endblock %}
 {% block content %}
-    <div id="app">
+    <div id="app" v-cloak>
         <div class="columns">
-            <div id="side-menu" class="column is-3 hero is-fullheight is-hidden-mobile" v-cloak>
+            <div id="side-menu" class="column is-2 hero is-fullheight is-hidden-mobile" >
                 <div class="container">
                     <nav class="level">
                         <p class="level-item has-text-centered">
@@ -34,7 +41,7 @@
                             {{ exercise.order }} / {{ exercise_count }}
                         </p>
                         <p class="level-item has-text-centered">
-                            <a @click="bufferSelectedFeatures" class="button is-primary">
+                            <a class="button is-primary">
                                 Next
                             </a>
                         </p>
@@ -55,42 +62,96 @@
                             Instructions
                         </div>
                         <div class="panel-block">
-                            {% for instruction in instructions %}
-                                <div class="level">
+                                <div class="level" :class="{'not-active': currentInstruction != instruction}"  v-for="instruction in instructions">
                                     <div class="level-left">
                                         <div class="level-item">
                                             <span class="icon">
-                                                <i class="fa fa-check-square-o"></i>
+                                                <i class="fa" :class="{'fa-check-square-o': instruction.completed, 'fa-square-o': !instruction.completed}"></i>
                                             </span>
                                         </div>
                                         <div class="level-item">
                                             <p>
-                                                {{ instruction.order }}. {{ instruction.description }}
+                                                [[ instruction.order ]]. [[instruction.description ]]
                                             </p>
                                         </div>
                                     </div>
                                 </div>
-                            {% endfor %}
                         </div>
                     </div>
-                    <div class="panel">
-                        <div class="panel-heading">
-                            Selected features
-                        </div>
-                        <div class="panel-block" v-for="feature in selectedFeatures">
-                            <p>Id: [[ feature.id ]] Type: [[feature.geometry.type ]]</p>
-                        </div>
-                    </div>
+
                 </div>
             </div>
             <div class="column is-8 is-paddingless">
                 <div id="map"></div>
             </div>
-            <div class="column is-2">
+            <div class="column is-2 hero">
+                    <aside class="menu" id="right-menu">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                GIS operations
+                            </div>
+                            <div class="panel-block">
+                                <div class="level">
+                                    <div class="level-item">
+                                        <button class="button" @click="toggleDialog('buffer')">Buffer</button>
+                                    </div>
+                                    <div class="level-item">
+                                        <p>Buffer the selected features</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-block">
+                                <div class="level">
+                                    <div class="level-item">
+                                        <button class="button" @click="toggleDialog('buffer')">Buffer</button>
+                                    </div>
+                                    <div class="level-item">
+                                        <p>Buffer the selected features</p>
+                                    </div>
+                                </div>
+                            </div>
 
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading">
+                                Layers on the map
+                            </div>
+                            <div class="panel-block" v-for="layer in layers">
+                                <p>[[ layer.name ]]</p>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading">
+                                Selected features
+                            </div>
+                            <div class="panel-block" v-for="feature in selectedFeatures">
+                                <p>Id: [[ feature.id ]] Type: [[feature.geometry.type ]]</p>
+                            </div>
+                        </div>
+                    </aside>
+            </div>
+        </div>
+
+
+        <div id="buffer-dialog" class="modal" v-bind:class="{'is-active': dialogs.buffer}">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Buffer</p>
+                    <button @click="toggleDialog('buffer')" class="delete"></button>
+                </header>
+                <section class="modal-card-body">
+                    <input type="text" v-model="newLayerName">
+                </section>
+                <footer class="modal-card-foot">
+                    <a @click="doGisOperation('buffer', {'size': 100, 'name': newLayerName})" class="button is-primary">Save changes</a>
+                    <a @click="toggleDialog('buffer')" class="button">Cancel</a>
+                </footer>
             </div>
         </div>
     </div>
+
+
 {% endblock content %}
 
 {# Override the footer so we can render it empty #}
@@ -110,14 +171,19 @@
             // Add the gisoperationsmixin so we can use the operations api.
             mixins: [gisOperationsMixin],
             data: {
-                message: 'Hello Vue.js!',
-                isMenuOpen: false,
+                newLayerName: '',
+                currentInstruction: null,
+                instructions: [],
                 layers: [],
                 selectedFeatures: [],
                 lineStringLayer: null,
                 polygonLayer: null,
                 pointLayer: null,
-                map: null
+                map: null,
+                dialogs: {
+                    'buffer': false,
+                    'intersection': false,
+                }
             },
             mounted: function () {
                 this.map = L.map('map').setView([map_center_lat, map_center_lng], 13);
@@ -128,8 +194,23 @@
             },
             methods: {
                 fetchData: function () {
+                    this.resetInstructions();
                     // Fetch the predefined data for the current exercise.
                     this.$http.get('/layers/' + exerciseSlug).then(this.handleResponse, this.handleError)
+                },
+                resetInstructions: function () {
+                    this.$http.get('/courses/' + exerciseSlug + '/instructions/').then(function (response) {
+                        this.instructions = response.body;
+                        for (var i = 0; i < this.instructions.length; i++) {
+                            var instruction = this.instructions[i];
+                            if (!instruction.completed) {
+                                this.currentInstruction = instruction;
+                                break;
+                            }
+                        }
+                    }, function () {
+
+                    });
                 },
                 handleError: function () {
 
@@ -151,21 +232,65 @@
                 },
                 addOrRemoveFeatureFromList: function (feature) {
                     var index = this.selectedFeatures.indexOf(feature);
-                    if (index === -1){
+                    if (index === -1) {
                         this.selectedFeatures.push(feature);
-                    }else {
+                    } else {
                         this.selectedFeatures.splice(index, 1);
                     }
                 },
-                bufferSelectedFeatures: function () {
-                    this.bufferFeatures(this.selectedFeatures, 100).then(function (response) {
-                        var geojson = L.geoJSON(response.body, {onEachFeature: this.onEachFeature});
-                        geojson.addTo(this.map);
-                        this.map.fitBounds(geojson.getBounds());
-
-                    }, this.handleError);
+                doGisOperation: function (operationName, extraArgs) {
+                    // Close all dialogs
+                    this.clearDialogs();
+                    // Did the user complete an instruction?
+                    this.checkInstruction(operationName, extraArgs);
+                    switch (operationName) {
+                        case 'buffer':
+                            this.bufferFeatures(this.selectedFeatures, extraArgs).then(function (response) {
+                                this.layers.push(response.body);
+                                var geojson = L.geoJSON(response.body.polygons, {onEachFeature: this.onEachFeature});
+                                geojson.addTo(this.map);
+                                // Zoom the map to the created buffer.
+                                this.map.fitBounds(geojson.getBounds());
+                            }, this.handleError);
+                    }
                     this.selectedFeatures = [];
                 },
+                toggleDialog: function (dialogName) {
+                    this.dialogs[dialogName] = !this.dialogs[dialogName];
+                },
+                clearDialogs: function () {
+                    for (var property in this.dialogs) {
+                        if (this.dialogs.hasOwnProperty(property)) {
+                            this.dialogs[property] = false;
+                        }
+                    }
+                },
+                checkInstruction: function (operationName, extraArgs){
+                    var correctOperation = this.currentInstruction.completionOperation === operationName;
+                    var correctArgs = true;
+                    // Check that the extra args contains all the required ones.
+                    for (var property in this.currentInstruction.completionArgs) {
+                        if (!extraArgs.hasOwnProperty(property)) {
+                            correctArgs = false;
+                            break;
+                        }
+                        if (extraArgs[property] != this.currentInstruction.completionArgs[property]) {
+                            correctArgs = false;
+                            break;
+                        }
+                    }
+                    if (correctOperation && correctArgs){
+                        // Complete step.
+                        var index = this.instructions.indexOf(this.currentInstruction);
+                        this.instructions[index].completed = true;
+                        var data = {'instruction_id': this.currentInstruction.id};
+                        this.$http.post('/courses/' + exerciseSlug + '/instructions/complete-instruction/', data).then(function (response) {
+                            this.resetInstructions();
+                        }, function () {
+
+                        })
+                    }
+                }
             }
         });
     </script>

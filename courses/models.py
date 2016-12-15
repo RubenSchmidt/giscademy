@@ -74,6 +74,11 @@ class Instruction(models.Model):
     exercise = models.ForeignKey('courses.Exercise', related_name='instructions')
     description = models.TextField()
     order = models.PositiveSmallIntegerField(default=0)
+    completionOperation = models.CharField(max_length=255)
+    completionArgs = JSONField()
+
+    def __str__(self):
+        return self.description
 
 
 class Enrollment(models.Model):
