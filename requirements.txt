@@ -5,6 +5,7 @@ channels==0.17.3
 constantly==15.1.0
 daphne==0.15.0
 Django==1.10.3
+django-ckeditor==5.1.1
 djangorestframework==3.5.3
 djangorestframework-gis==0.11
 incremental==16.10.1
