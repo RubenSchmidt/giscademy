@@ -39,6 +39,14 @@ class Course(SlugTitleable):
         return Enrollment.objects.get_or_create(course=self, user=user)
 
 
+class Enrollment(models.Model):
+    user = models.ForeignKey('auth.User')
+    course = models.ForeignKey('courses.Course')
+    lessons_completed = models.ManyToManyField(
+        'courses.Lesson'
+    )
+
+
 class Lesson(SlugTitleable):
     course = models.ForeignKey('courses.Course', related_name='lessons')
     overview = models.TextField()
@@ -62,7 +70,7 @@ class Exercise(SlugTitleable):
     description = RichTextField()
     map_center = PointField(blank=True, null=True)
 
-    next_exercise = models.ForeignKey('self', related_name='next',  blank=True, null=True)
+    next_exercise = models.ForeignKey('self', related_name='next', blank=True, null=True)
     prev_exercise = models.ForeignKey('self', related_name='prev', null=True, blank=True)
 
     def __str__(self):
@@ -90,8 +98,3 @@ class Instruction(models.Model):
 
     def __str__(self):
         return self.description
-
-
-class Enrollment(models.Model):
-    user = models.ForeignKey('auth.User')
-    course = models.ForeignKey('courses.Course')

@@ -1,4 +1,5 @@
 from courses.models import UserLesson
+from courses.services import lessons
 
 
 def check_completion(user_exercise, exercise):
@@ -10,5 +11,7 @@ def check_completion(user_exercise, exercise):
     # The user has completed all the instructions
     user_lesson, created = UserLesson.objects.get_or_create(user=user_exercise.user, lesson=exercise.lesson)
     user_lesson.exercises_completed.add(exercise)
+
+    lessons.check_completion(user_lesson, exercise.lesson)
     return True
 
