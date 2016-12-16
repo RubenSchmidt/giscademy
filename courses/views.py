@@ -10,18 +10,17 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from courses.models import Exercise, Lesson, Course, UserExercise, Instruction
+from courses.models import Exercise, Lesson, Course, UserExercise, Instruction, UserLesson
 from courses.serializers import InstructionSerializer
+from courses.services import exercises
 from giscademy.utils.view_utils import ProtectedView
 
 
 class LessonDetailView(ProtectedView):
     def get(self, request, course_slug, lesson_slug):
         lesson = get_object_or_404(Lesson, slug=lesson_slug)
-
-        # Check the users status
         exercises = lesson.exercise_set.all().order_by('order')
-        exercise = exercises[0]
+        exercise = exercises.first()
         return HttpResponseRedirect(reverse('exercise-detail', args=[lesson.course.slug, lesson.slug, exercise.slug]))
 
 
@@ -31,10 +30,13 @@ class ExerciseDetailView(ProtectedView):
     def get(self, request, course_slug, lesson_slug, exercise_slug):
         lesson = get_object_or_404(Lesson, slug=lesson_slug)
         exercise = get_object_or_404(Exercise, slug=exercise_slug, lesson=lesson)
-        exercise_count = lesson.exercise_set.count()
+        exercise_count = lesson.exercise_set.all().order_by('order').count()
         instructions = exercise.instructions.all()
+
         context = {
             'exercise': exercise,
+            'next_exercise': exercise.next_exercise,
+            'prev_exercise': exercise.prev_exercise,
             'map_center_lat': json.dumps(exercise.map_center.y),
             'map_center_lng': json.dumps(exercise.map_center.x),
             'instructions': instructions,
@@ -59,6 +61,12 @@ class CompleteInstructionView(APIView):
     def post(self, request, exercise_slug):
         exercise = get_object_or_404(Exercise, slug=exercise_slug)
         user_exercise, created = UserExercise.objects.get_or_create(exercise=exercise, user=request.user)
+
         instruction = get_object_or_404(Instruction, id=request.data.get('instruction_id'))
         user_exercise.instructions_completed.add(instruction)
-        return Response(status=status.HTTP_201_CREATED)
+
+        completed = exercises.check_completion(user_exercise, exercise)
+        data = {
+            'completed_exercise': completed
+        }
+        return Response(data, status=status.HTTP_201_CREATED)

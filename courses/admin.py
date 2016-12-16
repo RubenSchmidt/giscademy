@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 from django.contrib.gis.admin import OSMGeoAdmin
 
-from courses.models import Course, Lesson, Exercise, Enrollment, Instruction, UserExercise
+from courses.models import Course, Lesson, Exercise, Enrollment, Instruction, UserExercise, UserLesson
 
 
 @admin.register(Course)
@@ -33,4 +33,9 @@ class InstructionAdmin(admin.ModelAdmin):
 
 @admin.register(UserExercise)
 class UserExerciseAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(UserLesson)
+class UserLessonAdmin(admin.ModelAdmin):
     pass

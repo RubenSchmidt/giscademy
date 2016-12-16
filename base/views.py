@@ -4,8 +4,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import View
+from django.db.models import Count
 
-from courses.models import Course
+from courses.models import Course, Lesson
+from courses.services.lessons import get_user_progress_percent
 from giscademy.utils.view_utils import ProtectedView
 
 
@@ -69,7 +71,10 @@ class CourseDetailView(ProtectedView):
 
     def get(self, request, slug):
         course = get_object_or_404(Course, slug=slug)
-        lessons = course.lessons.all().order_by('order')
+        lessons = course.lessons.all().order_by('order').annotate(num_exercises=Count('exercise'))
+        for lesson in lessons:
+            lesson.user_progress = get_user_progress_percent(request.user, lesson)
+
         return render(request, self.template_name, {'course': course, 'lessons': lessons})
 
 

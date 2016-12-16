@@ -7,7 +7,6 @@ from giscademy.utils.model_utils import Timestampable
 
 class Layer(Timestampable):
     name = models.CharField(max_length=255)
-    json = JSONField(blank=True)
     exercise = models.ForeignKey('courses.Exercise', blank=True, null=True)
 
     def __str__(self):

@@ -48,11 +48,22 @@ class Lesson(SlugTitleable):
         return self.title
 
 
+class UserLesson(models.Model):
+    user = models.ForeignKey('auth.User')
+    lesson = models.ForeignKey('courses.Lesson', related_name='lessons')
+    exercises_completed = models.ManyToManyField(
+        'courses.Exercise'
+    )
+
+
 class Exercise(SlugTitleable):
     lesson = models.ForeignKey('courses.Lesson')
     order = models.PositiveSmallIntegerField(default=0)
     description = RichTextField()
     map_center = PointField(blank=True, null=True)
+
+    next_exercise = models.ForeignKey('self', related_name='next',  blank=True, null=True)
+    prev_exercise = models.ForeignKey('self', related_name='prev', null=True, blank=True)
 
     def __str__(self):
         return self.title
