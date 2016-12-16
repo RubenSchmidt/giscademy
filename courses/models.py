@@ -55,7 +55,7 @@ class Lesson(SlugTitleable):
     prev_lesson = models.ForeignKey('self', related_name='prev', null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return '{} | {}'.format(self.course, self.title)
 
 
 class UserLesson(models.Model):
@@ -76,7 +76,7 @@ class Exercise(SlugTitleable):
     prev_exercise = models.ForeignKey('self', related_name='prev', null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return '{} | {}'.format(self.lesson, self.title)
 
 
 class UserExercise(models.Model):

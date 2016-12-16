@@ -1,11 +1,5 @@
 import math
 
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import MultiPolygon
-
-from gisoperations.services import geojson
-from layers.models import Layer, Polygon
-
 UTM_NORTHERN_BASE = 32600
 UTM_SOUTHERN_BASE = 32700
 
@@ -113,21 +107,4 @@ def with_metric_buffer(geom, buffer_meters, map_srid=DEFAULT_MAP_SRID):
     return buffered_geom
 
 
-def buffer_geojson(json, buffer_meters, layer_name, user, exercise=None):
-    """
-    Buffer any geos geometry.
-    :param exercise:
-    :param layer_name:
-    :param user:
-    :param json: Input json
-    :param buffer_meters: Buffer size in meters
-    :return: Layer model
-    """
-    ds = DataSource(json)
-    layer = Layer.objects.create(name=layer_name, exercise=exercise, user=user)
-    geoms = ds[0].get_geoms(geos=True)
-    for geom in geoms:
-        buffered = with_metric_buffer(geom, buffer_meters)
-        Polygon.objects.create(geom=MultiPolygon(buffered), layer=layer)
 
-    return layer

@@ -16,12 +16,19 @@ var gisOperationsMixin = {
         },
         bufferFeatures: function (features, extraArgs) {
             var data = {
+                'operation': 'buffer',
                 'geojson': this.extractFeatureJson(features),
-                'meters': extraArgs.size,
-                'layer_name': extraArgs.name,
-                'exercise_slug': extraArgs.exercise_slug
+                'extra_args': extraArgs,
             };
-            return this.$http.post('/gis-operations/buffer/', data);
+            return this.$http.post('/gis-operations/operation/', data);
+        },
+        intersectFeatures: function (features, extraArgs) {
+            var data = {
+                'operation': 'intersect',
+                'geojson': this.extractFeatureJson(features),
+                'extra_args': extraArgs,
+            };
+            return this.$http.post('/gis-operations/operation/', data);
         }
     }
 };

@@ -7,7 +7,7 @@ from giscademy.utils.model_utils import Timestampable
 
 class Layer(Timestampable):
     name = models.CharField(max_length=255)
-    exercise = models.ForeignKey('courses.Exercise', blank=True, null=True)
+    exercise = models.ForeignKey('courses.Exercise', blank=True, null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey('auth.User', blank=True, null=True)
 
     def __str__(self):
