@@ -266,7 +266,9 @@
 
                 },
                 handleResponse: function (response) {
-                    this.layers = response.body;
+                    this.layers = response.body.layers;
+                    // Add the user layers if they have any for this exercise
+                    this.layers = this.layers.concat(response.body.user_layers);
                     for (var i = 0; i < this.layers.length; i++) {
                         var layer = this.layers[i];
                         var geoJson = L.geoJSON(layer.points.features, {onEachFeature: this.onEachFeature}).addTo(this.map);
@@ -343,8 +345,8 @@
                 doGisOperation: function (operationName, extraArgs) {
                     // Close all dialogs
                     this.clearDialogs();
-
                     this.operations.push({'name': operationName, 'extraArgs': extraArgs});
+                    extraArgs.exercise_slug = exerciseSlug;
                     switch (operationName) {
                         case 'buffer':
                             this.bufferFeatures(this.selectedFeatures, extraArgs).then(function (response) {

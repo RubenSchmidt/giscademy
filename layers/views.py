@@ -6,6 +6,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.views import View
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from layers.models import Layer, Point, Polygon, LineString
 from layers.serializers import LayerSerializer
@@ -18,11 +20,19 @@ class LayerListView(View):
         return JsonResponse(data=data, safe=False)
 
 
-class ExerciseLayersListView(View):
+class ExerciseLayersListView(APIView):
     def get(self, request, exercise_slug):
-        layers = Layer.objects.filter(exercise__slug=exercise_slug)
-        data = LayerSerializer(layers, many=True).data
-        return JsonResponse(data=data, safe=False)
+        """
+        Return the layers defined internally.
+        """
+        layers = Layer.objects.filter(exercise__slug=exercise_slug, user__isnull=True)
+        user_layers = Layer.objects.filter(exercise__slug=exercise_slug, user=request.user)
+        data = {
+            'layers': LayerSerializer(layers, many=True).data,
+            'user_layers': LayerSerializer(user_layers, many=True).data
+        }
+
+        return Response(data=data)
 
 
 class ImportGeoJsonView(View):
