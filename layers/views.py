@@ -31,7 +31,6 @@ class ExerciseLayersListView(APIView):
             'layers': LayerSerializer(layers, many=True).data,
             'user_layers': LayerSerializer(user_layers, many=True).data
         }
-
         return Response(data=data)
 
 

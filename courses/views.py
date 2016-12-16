@@ -34,6 +34,7 @@ class ExerciseDetailView(ProtectedView):
         instructions = exercise.instructions.all()
 
         context = {
+            'next_lesson': lesson.next_lesson,
             'exercise': exercise,
             'next_exercise': exercise.next_exercise,
             'prev_exercise': exercise.prev_exercise,

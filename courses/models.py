@@ -51,6 +51,8 @@ class Lesson(SlugTitleable):
     course = models.ForeignKey('courses.Course', related_name='lessons')
     overview = models.TextField()
     order = models.PositiveSmallIntegerField(default=0)
+    next_lesson = models.ForeignKey('self', related_name='next', blank=True, null=True)
+    prev_lesson = models.ForeignKey('self', related_name='prev', null=True, blank=True)
 
     def __str__(self):
         return self.title

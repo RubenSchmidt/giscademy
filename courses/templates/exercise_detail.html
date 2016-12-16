@@ -53,9 +53,16 @@
                                     Next
                                 </a>
                             {% else %}
-                                <a  class="button is-primary">
-                                    Next course
+                                {% if next_lesson %}
+                                <a href="{% url 'lesson-detail' next_lesson.course.slug next_lesson.slug %}" class="button is-primary">
+                                    Next lesson
                                 </a>
+                                {% else %}
+                                <a href="{% url 'learn' %}" class="button is-primary">
+                                    Home
+                                </a>
+                                {% endif %}
+
                             {% endif %}
                         </p>
                     </nav>
