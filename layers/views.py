@@ -2,10 +2,11 @@ from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.geos import MultiPolygon
 from django.core.serializers import serialize
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from django.views import View
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,11 +14,19 @@ from layers.models import Layer, Point, Polygon, LineString
 from layers.serializers import LayerSerializer
 
 
-class LayerListView(View):
+class LayerListView(APIView):
     def get(self, request):
         layers = Layer.objects.all()
         data = LayerSerializer(layers, many=True).data
-        return JsonResponse(data=data, safe=False)
+        return Response(data=data)
+
+
+class LayerDetailView(APIView):
+
+    def delete(self, request, pk):
+        layer = get_object_or_404(Layer, pk=pk)
+        layer.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ExerciseLayersListView(APIView):

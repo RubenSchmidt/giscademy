@@ -23,17 +23,39 @@ class GISOperationSerializer(serializers.Serializer):
     def create(self, validated_data):
         raise NotImplementedError
 
-
-class IntersectSerializer(GISOperationSerializer):
-    extra_args_list = ['layer_name']
-
-    def create(self, validated_data):
+    @staticmethod
+    def _get_exercise(validated_data):
         extra_args = validated_data['extra_args']
         exercise_slug = extra_args.get('exercise_slug')
         if exercise_slug:
             exercise = get_object_or_404(Exercise, slug=exercise_slug)
         else:
             exercise = None
+        return exercise
+
+
+class MergeSerializer(GISOperationSerializer):
+    extra_args_list = ['layer_name']
+
+    def create(self, validated_data):
+        exercise = self._get_exercise(validated_data)
+        extra_args = validated_data['extra_args']
+        layer_name = extra_args.get('layer_name')
+        layer = operations.create_merge_layer(
+            json=json.dumps(validated_data['geojson']),
+            user=self.context['request'].user,
+            layer_name=layer_name,
+            exercise=exercise
+        )
+        return layer
+
+
+class IntersectSerializer(GISOperationSerializer):
+    extra_args_list = ['layer_name']
+
+    def create(self, validated_data):
+        exercise = self._get_exercise(validated_data)
+        extra_args = validated_data['extra_args']
         layer_name = extra_args.get('layer_name')
 
         layer = operations.create_intersection_layer(
@@ -53,11 +75,7 @@ class BufferSerializer(GISOperationSerializer):
 
     def create(self, validated_data):
         extra_args = validated_data['extra_args']
-        exercise_slug = extra_args.get('exercise_slug')
-        if exercise_slug:
-            exercise = get_object_or_404(Exercise, slug=exercise_slug)
-        else:
-            exercise = None
+        exercise = self._get_exercise(validated_data)
 
         layer_name = extra_args.get('layer_name')
         buffer_meters = extra_args.get('size')
@@ -69,5 +87,3 @@ class BufferSerializer(GISOperationSerializer):
             self.context['request'].user,
             exercise)
         return layer
-
-

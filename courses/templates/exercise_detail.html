@@ -118,11 +118,8 @@
                         </div>
                         <div class="panel-block">
                             <div class="level">
-                                <div class="level-item">
+                                <div class="level-left">
                                     <button class="button" @click="toggleDialog('buffer')">Buffer</button>
-                                </div>
-                                <div class="level-item">
-                                    <p>Buffer the selected features</p>
                                 </div>
                             </div>
                         </div>
@@ -131,24 +128,43 @@
                                 <div class="level-item">
                                     <button class="button" @click="toggleDialog('intersect')">Intersect</button>
                                 </div>
-                                <div class="level-item">
-                                    <p>Intersect two features</p>
-                                </div>
                             </div>
                         </div>
-
                     </div>
                     <div class="panel">
                         <div class="panel-heading">
-                            Layers on the map
+                            <div class="level">
+                                <p>Layers on the map</p>
+                                <button class="button is-small is-primary">Add</button>
+                            </div>
+
+                        </div>
+                        <div class="panel-block">
+                            <div class="level">
+                                <button class="button is-small" @click="bringSelectedLayersToFront()">Bring to front</button>
+
+                                <button class="button is-small is-danger" @click="deleteSelectedLayers()">Delete</button>
+                            </div>
                         </div>
                         <div class="panel-block" v-for="layer in layers">
-                            <p>[[ layer.name ]]</p>
+                            <div class="level">
+                                <div class="level-left">
+                                    <input type="checkbox" v-model="layer.checked" @click="highlightSelectedLayer(layer)">
+                                </div>
+                                <div class="level-right">
+                                     <p>[[ layer.name ]]</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="panel">
                         <div class="panel-heading">
                             Selected features
+                        </div>
+                        <div class="panel-block">
+                            <div class="level">
+                                <button class="button is-small" @click="toggleDialog('mergeSelected')">Merge to layer</button>
+                            </div>
                         </div>
                         <div class="panel-block" v-for="layer in selectedFeatures">
                             <p>Id: [[ layer.feature.id ]] Type: [[layer.feature.geometry.type ]]</p>
@@ -176,8 +192,7 @@
                     </p>
                 </section>
                 <footer class="modal-card-foot">
-                    <a @click="doGisOperation('buffer', {'size': bufferSize, 'layer_name': newLayerName})" class="button is-primary">Save
-                        changes</a>
+                    <a @click="doGisOperation('buffer', {'size': bufferSize, 'layer_name': newLayerName})" class="button is-primary">Buffer</a>
                     <a @click="toggleDialog('buffer')" class="button">Cancel</a>
                 </footer>
             </div>
@@ -200,9 +215,32 @@
                     </p>
                 </section>
                 <footer class="modal-card-foot">
-                    <a @click="doGisOperation('intersect', {'layer_name': newLayerName})" class="button is-primary">Save
-                        changes</a>
+                    <a @click="doGisOperation('intersect', {'layer_name': newLayerName})" class="button is-primary">Intersect</a>
                     <a @click="toggleDialog('intersect')" class="button">Cancel</a>
+                </footer>
+            </div>
+        </div>
+
+        <div id="merge-selected-dialog" class="modal" v-bind:class="{'is-active': dialogs.mergeSelected}">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Merge selected features</p>
+                    <button @click="toggleDialog('mergeSelected')" class="delete"></button>
+                </header>
+                <section class="modal-card-body">
+                    <label class="label">Name</label>
+                    <p class="control">
+                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
+                    </p>
+                    <label class="label">Features</label>
+                    <p v-for="layer in selectedFeatures">
+                        [[layer.feature.geometry.type ]]
+                    </p>
+                </section>
+                <footer class="modal-card-foot">
+                    <a @click="doGisOperation('merge', {'layer_name': newLayerName})" class="button is-primary">Merge</a>
+                    <a @click="toggleDialog('mergeSelected')" class="button">Cancel</a>
                 </footer>
             </div>
         </div>
@@ -243,6 +281,12 @@
             // Add the gisoperationsmixin so we can use the operations api.
             mixins: [gisOperationsMixin],
             data: {
+                defaultStyle: {
+                    "color": "#4b7eff",
+                    "weight": 5,
+                    "opacity": 1,
+                    "fillOpacity": 0.7
+                },
                 hasCompletedExercise: false,
                 newLayerName: '',
                 bufferSize: null,
@@ -258,6 +302,7 @@
                     'buffer': false,
                     'intersect': false,
                     'completed': false,
+                    'mergeSelected': false
                 },
                 operations: []
             },
@@ -277,7 +322,7 @@
                 fetchData: function () {
                     this.resetInstructions();
                     // Fetch the predefined data for the current exercise.
-                    this.$http.get('/layers/' + exerciseSlug).then(this.handleResponse, this.handleError)
+                    this.$http.get('/layers/' + exerciseSlug + '/').then(this.handleResponse, this.handleError)
                 },
                 resetInstructions: function () {
                     this.$http.get('/courses/' + exerciseSlug + '/instructions/').then(function (response) {
@@ -302,10 +347,16 @@
                     this.layers = this.layers.concat(response.body.user_layers);
                     for (var i = 0; i < this.layers.length; i++) {
                         var layer = this.layers[i];
-                        var geoJson = L.geoJSON(layer.points.features, {onEachFeature: this.onEachFeature}).addTo(this.map);
+
+                        var geoJson = L.geoJSON(layer.points.features, {
+                            style: this.defaultStyle,
+                            onEachFeature: this.onEachFeature
+                        }).addTo(this.map);
+
                         geoJson.addData(layer.polygons.features);
                         geoJson.addData(layer.linestrings.features);
                         layer.leafletLayer = geoJson;
+                        layer.checked = false;
                     }
                 },
                 onEachFeature: function (feature, layer) {
@@ -327,6 +378,25 @@
                 onMouseOut: function (e) {
                     this.resetHighlight(e.target);
                 },
+                highlightSelectedLayer: function (layer) {
+                    // FIXME disabled because the reset does not work.
+                    return;
+
+                    var leafletLayer = layer.leafletLayer;
+
+                    if (layer.checked){
+                        console.log('reset');
+                        leafletLayer.setStyle(this.defaultSyle);
+                    }
+                    if (!layer.checked) {
+                        leafletLayer.setStyle({
+                            weight: 5,
+                            color: '#23c6ff',
+                            dashArray: '',
+                            fillOpacity: 0.7
+                        });
+                    }
+                },
                 highlightFeature: function (layer) {
                     if (layer._icon) {
                         // Points cant be resized stock
@@ -338,9 +408,6 @@
                             dashArray: '',
                             fillOpacity: 0.7
                         });
-                        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                            layer.bringToFront();
-                        }
                     }
                 },
                 resetHighlight: function (target, force) {
@@ -363,7 +430,6 @@
 
                 },
                 addOrRemoveFeatureFromList: function (layer) {
-                    var feature = layer.feature;
                     var index = this.selectedFeatures.indexOf(layer);
                     if (index === -1) {
                         this.selectedFeatures.push(layer);
@@ -372,36 +438,6 @@
                     } else {
                         this.selectedFeatures.splice(index, 1);
                     }
-                },
-                doGisOperation: function (operationName, extraArgs) {
-                    // Close all dialogs
-                    this.clearDialogs();
-                    this.operations.push({'name': operationName, 'extraArgs': extraArgs});
-                    extraArgs.exercise_slug = exerciseSlug;
-                    switch (operationName) {
-                        case 'buffer':
-                            this.bufferFeatures(this.selectedFeatures, extraArgs).then(function (response) {
-                                var layer = response.body;
-                                var geojson = L.geoJSON(response.body.polygons, {onEachFeature: this.onEachFeature});
-                                geojson.addTo(this.map);
-                                layer.leafletLayer = geojson;
-                                this.layers.push(layer);
-                                // Zoom the map to the created buffer.
-                                this.map.fitBounds(geojson.getBounds());
-                            }, this.handleError);
-                            break;
-                        case 'intersect':
-                            this.intersectFeatures(this.selectedFeatures, extraArgs).then(function (response) {
-                                var layer = response.body;
-                                var geojson = L.geoJSON(response.body.polygons, {onEachFeature: this.onEachFeature});
-                                geojson.addTo(this.map);
-                                layer.leafletLayer = geojson;
-                                this.layers.push(layer);
-                                // Zoom the map to the created buffer.
-                                this.map.fitBounds(geojson.getBounds());
-                            }, this.handleError);
-                    }
-                    this.resetSelectedFeatures();
                 },
                 toggleDialog: function (dialogName) {
                     this.dialogs[dialogName] = !this.dialogs[dialogName];
@@ -446,6 +482,33 @@
                         }, function () {
 
                         })
+                    }
+                },
+                deleteSelectedLayers: function () {
+                    for (var i = 0; i < this.layers.length; i++) {
+                        var layer = this.layers[i];
+                        if (!layer.checked || !layer.user) continue;
+                        this.map.removeLayer(layer.leafletLayer);
+
+                        // Remove the layer from the layers list
+                        this.layers.splice(i, 1);
+                        this.deleteLayer(layer);
+                        // TODO remove from database
+                    }
+                },
+                bringSelectedLayersToFront: function () {
+                    for (var i = 0; i < this.layers.length; i++) {
+                        var layer = this.layers[i];
+                        if (!layer.checked) continue;
+                        var lf = layer.leafletLayer;
+                        lf.bringToFront();
+                    }
+                },
+                mergeSelectedFeatures: function () {
+                    if(!this.selectedFeatures.length) return;
+                    for (var i = 0; i < this.selectedFeatures.length; i++) {
+                        var feature = this.selectedFeatures[i];
+
                     }
                 }
             }

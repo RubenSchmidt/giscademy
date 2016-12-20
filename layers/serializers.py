@@ -39,4 +39,4 @@ class LayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Layer
-        fields = ['name', 'exercise', 'points', 'linestrings', 'polygons']
+        fields = ['id', 'name', 'user', 'exercise', 'points', 'linestrings', 'polygons']
