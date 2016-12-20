@@ -31,7 +31,7 @@ var gisOperationsMixin = {
                 'geojson': this.extractFeatureJson(features),
                 'extra_args': extraArgs,
             };
-
+            return this.$http.post('/gis-operations/operation/', data);
         },
         mergeFeatures: function (features, extraArgs) {
             var data = {
