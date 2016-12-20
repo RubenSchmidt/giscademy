@@ -16,7 +16,6 @@ class InstructionSerializer(serializers.ModelSerializer):
         super(InstructionSerializer, self).__init__(instance, *args, **kwargs)
 
     def get_completed(self, instance):
-        print(instance)
         if self.user_exercise:
             return self.user_exercise.instructions_completed.all().filter(id=instance.id).exists()
         return False

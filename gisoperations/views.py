@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gisoperations.serializers import BufferSerializer, IntersectSerializer, MergeSerializer
+from gisoperations.serializers import BufferSerializer, IntersectSerializer, MergeSerializer, UnionSerializer, \
+    DifferenceSerializer
 from layers.serializers import LayerSerializer
 
 
@@ -34,5 +35,9 @@ class OperationView(APIView):
             return IntersectSerializer
         elif operation == 'merge':
             return MergeSerializer
+        elif operation == 'union':
+            return UnionSerializer
+        elif operation == 'difference':
+            return DifferenceSerializer
         else:
             raise NotImplementedError

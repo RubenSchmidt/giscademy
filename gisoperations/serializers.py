@@ -50,6 +50,38 @@ class MergeSerializer(GISOperationSerializer):
         return layer
 
 
+class UnionSerializer(GISOperationSerializer):
+    extra_args_list = ['layer_name']
+
+    def create(self, validated_data):
+        exercise = self._get_exercise(validated_data)
+        extra_args = validated_data['extra_args']
+        layer_name = extra_args.get('layer_name')
+        layer = operations.create_union_layer(
+            json=json.dumps(validated_data['geojson']),
+            user=self.context['request'].user,
+            layer_name=layer_name,
+            exercise=exercise
+        )
+        return layer
+
+
+class DifferenceSerializer(GISOperationSerializer):
+    extra_args_list = ['layer_name']
+
+    def create(self, validated_data):
+        exercise = self._get_exercise(validated_data)
+        extra_args = validated_data['extra_args']
+        layer_name = extra_args.get('layer_name')
+        layer = operations.create_difference_layer(
+            json=json.dumps(validated_data['geojson']),
+            user=self.context['request'].user,
+            layer_name=layer_name,
+            exercise=exercise
+        )
+        return layer
+
+
 class IntersectSerializer(GISOperationSerializer):
     extra_args_list = ['layer_name']
 

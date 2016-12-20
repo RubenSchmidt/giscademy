@@ -6,6 +6,28 @@ from gisoperations.services.buffers import with_metric_buffer
 from layers.models import Layer, Polygon, Point, LineString
 
 
+def create_difference_layer(json, layer_name, user, exercise=None):
+    ds = DataSource(json)
+    layer = Layer.objects.create(name=layer_name, exercise=exercise, user=user)
+    geoms = ds[0].get_geoms(geos=True)
+    base_geom = geoms[0]
+    for geom in geoms[1:]:
+        base_geom = base_geom.difference(geom)
+    Polygon.objects.create(geom=MultiPolygon(base_geom), layer=layer)
+    return layer
+
+
+def create_union_layer(json, layer_name, user, exercise=None):
+    ds = DataSource(json)
+    layer = Layer.objects.create(name=layer_name, exercise=exercise, user=user)
+    geoms = ds[0].get_geoms(geos=True)
+    base_geom = geoms[0]
+    for geom in geoms[1:]:
+        base_geom = base_geom.union(geom)
+    Polygon.objects.create(geom=MultiPolygon(base_geom), layer=layer)
+    return layer
+
+
 def create_merge_layer(json, layer_name, user, exercise=None):
     ds = DataSource(json)
     layer = Layer.objects.create(name=layer_name, exercise=exercise, user=user)
@@ -50,13 +72,13 @@ def create_intersection_layer(json, layer_name, user, exercise=None):
     ds = DataSource(json)
     layer = Layer.objects.create(name=layer_name, exercise=exercise, user=user)
     geoms = ds[0].get_geoms(geos=True)
-    if len(geoms) != 2:
-        return None
+    base_geom = geoms[0]
 
-    intersection_geos = geoms[0].intersection(geoms[1])
+    for geom in geoms[1:]:
+        base_geom = base_geom.intersection(geom)
 
     try:
-        geom = MultiPolygon(intersection_geos)
+        geom = MultiPolygon(base_geom)
     except:
         return None
     Polygon.objects.create(geom=geom, layer=layer)

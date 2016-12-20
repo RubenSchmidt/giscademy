@@ -130,6 +130,27 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="panel-block">
+                            <div class="level">
+                                <div class="level-item">
+                                    <button class="button" @click="toggleDialog('union')">Union</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-block">
+                            <div class="level">
+                                <div class="level-item">
+                                    <button class="button" @click="toggleDialog('difference')">Difference</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-block">
+                            <div class="level">
+                                <div class="level-item">
+                                    <button class="button" @click="toggleDialog('mergeSelected')">Merge to layer</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="panel">
                         <div class="panel-heading">
@@ -163,7 +184,7 @@
                         </div>
                         <div class="panel-block">
                             <div class="level">
-                                <button class="button is-small" @click="toggleDialog('mergeSelected')">Merge to layer</button>
+                                <button class="button is-small is-danger" @click="toggleDialog('mergeSelected')">Delete</button>
                             </div>
                         </div>
                         <div class="panel-block" v-for="layer in selectedFeatures">
@@ -245,6 +266,54 @@
             </div>
         </div>
 
+        <div id="union-dialog" class="modal" v-bind:class="{'is-active': dialogs.union}">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Union</p>
+                    <button @click="toggleDialog('union')" class="delete"></button>
+                </header>
+                <section class="modal-card-body">
+                    <label class="label">Name</label>
+                    <p class="control">
+                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
+                    </p>
+                    <label class="label">Features</label>
+                    <p v-for="layer in selectedFeatures">
+                        [[layer.feature.geometry.type ]]
+                    </p>
+                </section>
+                <footer class="modal-card-foot">
+                    <a @click="doGisOperation('union', {'layer_name': newLayerName})" class="button is-primary">Union</a>
+                    <a @click="toggleDialog('union')" class="button">Cancel</a>
+                </footer>
+            </div>
+        </div>
+
+        <div id="difference-dialog" class="modal" v-bind:class="{'is-active': dialogs.difference}">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Difference</p>
+                    <button @click="toggleDialog('difference')" class="delete"></button>
+                </header>
+                <section class="modal-card-body">
+                    <label class="label">Name</label>
+                    <p class="control">
+                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
+                    </p>
+                    <label class="label">Features</label>
+                    <p v-for="layer in selectedFeatures">
+                        [[layer.feature.geometry.type ]]
+                    </p>
+                </section>
+                <footer class="modal-card-foot">
+                    <a @click="doGisOperation('difference', {'layer_name': newLayerName})" class="button is-primary">Union</a>
+                    <a @click="toggleDialog('difference')" class="button">Cancel</a>
+                </footer>
+            </div>
+        </div>
+
         <div id="completed-dialog" class="modal" v-bind:class="{'is-active': dialogs.completed}">
             <div class="modal-background"></div>
             <div class="modal-card">
@@ -302,7 +371,9 @@
                     'buffer': false,
                     'intersect': false,
                     'completed': false,
-                    'mergeSelected': false
+                    'mergeSelected': false,
+                    'union': false,
+                    'difference': false,
                 },
                 operations: []
             },
@@ -493,7 +564,6 @@
                         // Remove the layer from the layers list
                         this.layers.splice(i, 1);
                         this.deleteLayer(layer);
-                        // TODO remove from database
                     }
                 },
                 bringSelectedLayersToFront: function () {
@@ -502,13 +572,6 @@
                         if (!layer.checked) continue;
                         var lf = layer.leafletLayer;
                         lf.bringToFront();
-                    }
-                },
-                mergeSelectedFeatures: function () {
-                    if(!this.selectedFeatures.length) return;
-                    for (var i = 0; i < this.selectedFeatures.length; i++) {
-                        var feature = this.selectedFeatures[i];
-
                     }
                 }
             }
