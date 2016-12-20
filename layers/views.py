@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from layers.models import Layer, Point, Polygon, LineString
+from layers.permissions import IsObjectUser
 from layers.serializers import LayerSerializer
 
 
@@ -23,8 +24,11 @@ class LayerListView(APIView):
 
 class LayerDetailView(APIView):
 
+    permission_classes = (IsObjectUser, )
+
     def delete(self, request, pk):
         layer = get_object_or_404(Layer, pk=pk)
+        self.check_object_permissions(request, layer)
         layer.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
