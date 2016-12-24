@@ -156,7 +156,7 @@
                         <div class="panel-heading">
                             <div class="level">
                                 <p>Layers on the map</p>
-                                <button class="button is-small is-primary">Add</button>
+                                <button class="button is-small is-primary" @click="toggleDialog('upload')">Add</button>
                             </div>
 
                         </div>
@@ -329,6 +329,29 @@
                 </footer>
             </div>
         </div>
+        <div id="upload-dialog" class="modal" v-bind:class="{'is-active': dialogs.upload}">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Add</p>
+                    <button @click="toggleDialog('upload')" class="delete"></button>
+                </header>
+                <section class="modal-card-body">
+                    <label class="label">Name</label>
+                    <p class="control">
+                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
+                    </p>
+                    <label class="label">File</label>
+                    <p class="control">
+                        <input type="file" @change="setFile($event)">
+                    </p>
+                </section>
+                <footer class="modal-card-foot">
+                    <a class="button is-primary" @click="addLayerFromFile()">Add</a>
+                    <a @click="toggleDialog('upload')" class="button">Cancel</a>
+                </footer>
+            </div>
+        </div>
     </div>
 
 {% endblock content %}
@@ -338,6 +361,14 @@
 {% endblock %}
 {% block js %}
     <script src="https://npmcdn.com/@turf/turf@3.5.1/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
+    <script src="{% static 'js/shp2geojson/jszip.js' %}"></script>
+    <script src="{% static 'js/shp2geojson/jszip-utils.js' %}"></script>
+    <!--[if IE]>
+    <script type="text/javascript" src="{% static 'js/shp2geojson/jszip-utils-ie.js' %}"></script>
+    <![endif]-->
+    <script src="{% static 'js/shp2geojson/preprocess.js' %}"></script>
+    <script src="{% static 'js/shp2geojson/preview.js' %}"></script>
     <script>
         var exerciseSlug = "{{ exercise.slug }}";
         // Set the center for the map defined by the exercise.
@@ -358,6 +389,7 @@
                 },
                 hasCompletedExercise: false,
                 newLayerName: '',
+                file: null,
                 bufferSize: null,
                 currentInstruction: null,
                 instructions: [],
@@ -374,6 +406,7 @@
                     'mergeSelected': false,
                     'union': false,
                     'difference': false,
+                    'upload': false
                 },
                 operations: []
             },
@@ -572,6 +605,25 @@
                         if (!layer.checked) continue;
                         var lf = layer.leafletLayer;
                         lf.bringToFront();
+                    }
+                },
+                setFile: function (e) {
+                    var file = e.target.files[0];
+                    this.file = file;
+                },
+                addLayerFromFile: function () {
+                    if (!this.file) return;
+                    if (this.file.name.split('.')[1] == 'zip') {
+                        loadshp({
+                            url: this.file,
+                            encoding: 'utf-8',
+                            EPSG: 4326
+                        }, function (geojson) {
+                            vue.toggleDialog('upload');
+                            var data = L.geoJSON(geojson,{onEachFeature: vue.onEachFeature});
+                            data.addTo(vue.map);
+                            vue.map.fitBounds(data.getBounds());
+                        })
                     }
                 }
             }
