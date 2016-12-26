@@ -17,7 +17,8 @@ from layers.serializers import LayerSerializer
 
 class LayerListView(APIView):
     def get(self, request):
-        layers = Layer.objects.all()
+        user = request.user
+        layers = user.layer_set.all().filter(exercise__isnull=True)
         data = LayerSerializer(layers, many=True).data
         return Response(data=data)
 

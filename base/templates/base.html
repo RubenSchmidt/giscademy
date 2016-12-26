@@ -20,6 +20,10 @@
         .has-nav {
             margin-top: 52px;
         }
+
+        #map {
+            height: 100%;
+        }
     </style>
 
     {% block style %}{% endblock style %}
@@ -47,6 +51,10 @@
             <a href="{% url 'catalog' %}"
                class="nav-item is-tab {% if request.get_full_path == '/catalog/' %} is-active {% endif %}">
                 Catalog
+            </a>
+            <a href="{% url 'sandbox' %}"
+               class="nav-item is-tab {% if request.get_full_path == '/sandbox/' %} is-active {% endif %}">
+                Sandbox
             </a>
             <span class="nav-item">
         {{ request.user.username }}
@@ -99,6 +107,15 @@
 <script src="https://unpkg.com/vue-resource@1.0.3/dist/vue-resource.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 <script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://npmcdn.com/@turf/turf@3.5.1/turf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
+<script src="{% static 'js/shp2geojson/jszip.js' %}"></script>
+<script src="{% static 'js/shp2geojson/jszip-utils.js' %}"></script>
+<!--[if IE]>
+<script type="text/javascript" src="{% static 'js/shp2geojson/jszip-utils-ie.js' %}"></script>
+<![endif]-->
+<script src="{% static 'js/shp2geojson/preprocess.js' %}"></script>
+<script src="{% static 'js/shp2geojson/preview.js' %}"></script>
 <script src="{% static 'js/operations.js' %}"></script>
 <script>
     // The following code is based off a toggle menu by @Bradcomp

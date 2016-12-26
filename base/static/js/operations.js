@@ -66,8 +66,11 @@ var gisOperationsMixin = {
             this.clearDialogs();
             // Save the operation
             this.operations.push({'name': operationName, 'extraArgs': extraArgs});
-            // Add the exercise name if it exists
-            extraArgs.exercise_slug = exerciseSlug;
+
+            if (typeof exerciseSlug !== 'undefined') {
+                // Add the exercise name if it exists
+                extraArgs.exercise_slug = exerciseSlug;
+            }
 
             // Add all the features from both selected from map and the slected layers.
             var features = [];

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+    <div class="columns">
+        <div class="column">
+            {% include 'gisapp.html' %}
+        </div>
+    </div>
+    <div id="app"></div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/gisapp.js' %}"></script>
+<script>
+    var vue = new Vue({
+        el:'#app',
+        mounted: function () {
+                this.$http.get('/layers/').then(function (response) {
+                    GISApp.addData(response.body);
+                }, function (error) {
+
+                })
+            }
+    })
+</script>
+{% endblock %}

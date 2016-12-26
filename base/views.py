@@ -112,7 +112,7 @@ class CatalogView(ProtectedView):
 
 
 class SandboxView(View):
-    template_name = 'exercise_detail.html'
+    template_name = 'sandbox.html'
 
     def get(self, request):
         return render(request, self.template_name)

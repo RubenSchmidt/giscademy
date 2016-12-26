@@ -1,0 +1,197 @@
+/**
+ * Created by rubenschmidt on 26.12.2016.
+ */
+Vue.component('gisapp', {
+    // options
+})
+var GISApp = new Vue({
+    el: '#gisapp',
+    delimiters: ["[[", "]]"],
+    // Add the gisoperationsmixin so we can use the operations api.
+    mixins: [gisOperationsMixin],
+    data: {
+        defaultStyle: {
+            "color": "#4b7eff",
+            "weight": 5,
+            "opacity": 1,
+            "fillOpacity": 0.7
+        },
+        newLayerName: '',
+        file: null,
+        bufferSize: null,
+        layers: [],
+        selectedFeatures: [],
+        lineStringLayer: null,
+        polygonLayer: null,
+        geoJson: null,
+        map: null,
+        dialogs: {
+            'buffer': false,
+            'intersect': false,
+            'completed': false,
+            'mergeSelected': false,
+            'union': false,
+            'difference': false,
+            'upload': false
+        },
+        operations: []
+
+    },
+    mounted: function () {
+        this.map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(this.map);
+
+        this.map.on('click', function (e) {
+            GISApp.resetSelectedFeatures();
+        });
+    },
+    methods: {
+        setCenter: function (lat, lng, zoom) {
+            this.map.setView([lat, lng], zoom)
+        },
+        addData: function (layers) {
+            for (var i = 0; i < layers.length; i++) {
+                var layer = layers[i];
+                var geoJson = L.geoJSON(layer.points.features, {
+                    style: this.defaultStyle,
+                    onEachFeature: this.onEachFeature
+                }).addTo(this.map);
+                geoJson.addData(layer.polygons.features);
+                geoJson.addData(layer.linestrings.features);
+                layer.leafletLayer = geoJson;
+                layer.checked = false;
+            }
+            this.layers = this.layers.concat(layers);
+        },
+        onEachFeature: function (feature, layer) {
+            //bind click
+            layer.on({
+                click: this.whenClicked,
+                mouseover: this.onMouseOver,
+                mouseout: this.onMouseOut
+            });
+        },
+        whenClicked: function (e) {
+            L.DomEvent.stopPropagation(e);
+            this.addOrRemoveFeatureFromList(e.target);
+        },
+
+        onMouseOver: function (e) {
+            this.highlightFeature(e.target);
+        },
+        onMouseOut: function (e) {
+            this.resetHighlight(e.target);
+        },
+        highlightSelectedLayer: function (layer) {
+            // FIXME disabled because the reset does not work.
+            return;
+
+            var leafletLayer = layer.leafletLayer;
+
+            if (layer.checked) {
+                console.log('reset');
+                leafletLayer.setStyle(this.defaultSyle);
+            }
+            if (!layer.checked) {
+                leafletLayer.setStyle({
+                    weight: 5,
+                    color: '#23c6ff',
+                    dashArray: '',
+                    fillOpacity: 0.7
+                });
+            }
+        },
+        highlightFeature: function (layer) {
+            if (layer._icon) {
+                // Points cant be resized stock
+                // TODO implement
+            } else {
+                layer.setStyle({
+                    weight: 5,
+                    color: '#23c6ff',
+                    dashArray: '',
+                    fillOpacity: 0.7
+                });
+            }
+        },
+        resetHighlight: function (target, force) {
+            for (var i = 0; i < this.layers.length; i++) {
+                var layer = this.layers[i];
+                if (this.selectedFeatures.indexOf(target) === -1) {
+                    layer.leafletLayer.resetStyle(target);
+                }
+            }
+        },
+        resetSelectedFeatures: function () {
+            // When the map is clicked we want to reset the selected features
+            var resetFeatures = GISApp.selectedFeatures.slice();
+            GISApp.selectedFeatures = [];
+
+            for (var i = 0; i < resetFeatures.length; i++) {
+                var feature = resetFeatures[i];
+                GISApp.resetHighlight(feature);
+            }
+
+        },
+        addOrRemoveFeatureFromList: function (layer) {
+            var index = this.selectedFeatures.indexOf(layer);
+            if (index === -1) {
+                this.selectedFeatures.push(layer);
+                this.highlightFeature(layer);
+
+            } else {
+                this.selectedFeatures.splice(index, 1);
+            }
+        },
+        toggleDialog: function (dialogName) {
+            this.dialogs[dialogName] = !this.dialogs[dialogName];
+        },
+        clearDialogs: function () {
+            for (var property in this.dialogs) {
+                if (this.dialogs.hasOwnProperty(property)) {
+                    this.dialogs[property] = false;
+                }
+            }
+        },
+        deleteSelectedLayers: function () {
+            for (var i = 0; i < this.layers.length; i++) {
+                var layer = this.layers[i];
+                if (!layer.checked || !layer.user) continue;
+                this.map.removeLayer(layer.leafletLayer);
+
+                // Remove the layer from the layers list
+                this.layers.splice(i, 1);
+                this.deleteLayer(layer);
+            }
+        },
+        bringSelectedLayersToFront: function () {
+            for (var i = 0; i < this.layers.length; i++) {
+                var layer = this.layers[i];
+                if (!layer.checked) continue;
+                var lf = layer.leafletLayer;
+                lf.bringToFront();
+            }
+        },
+        setFile: function (e) {
+            var file = e.target.files[0];
+            this.file = file;
+        },
+        addLayerFromFile: function () {
+            if (!this.file) return;
+            if (this.file.name.split('.')[1] == 'zip') {
+                loadshp({
+                    url: this.file,
+                    encoding: 'utf-8',
+                    EPSG: 4326
+                }, function (geojson) {
+                    GISApp.toggleDialog('upload');
+                    var data = L.geoJSON(geojson, {onEachFeature: GISApp.onEachFeature});
+                    data.addTo(GISApp.map);
+                    GISApp.map.fitBounds(data.getBounds());
+                })
+            }
+        }
+    }
+});

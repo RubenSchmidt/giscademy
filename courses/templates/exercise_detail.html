@@ -2,9 +2,6 @@
 {% load static %}
 {% block style %}
     <style>
-        #map {
-            height: 100%;
-        }
 
         #side-menu {
             height: 100vh;
@@ -28,329 +25,89 @@
 {% block nav %}
 {% endblock %}
 {% block content %}
-    <div id="app" v-cloak>
-        <div class="columns">
-            <div id="side-menu" class="column is-2 hero is-fullheight is-hidden-mobile">
-                <div class="container">
-                    <nav class="level">
-                        <p class="level-item has-text-centered">
-                            {% if prev_exercise %}
-                                <a href="{% url 'exercise-detail' prev_exercise.lesson.course.slug prev_exercise.lesson.slug prev_exercise.slug %}" class="button is-primary">
-                                    Back
-                                </a>
-                            {% else %}
-                                <a class="button is-primary is-disabled">
-                                    Back
-                                </a>
-                            {% endif %}
-                        </p>
-                        <p class="level-item has-text-centered">
-                            {{ exercise.order }} / {{ exercise_count }}
-                        </p>
-                        <p class="level-item has-text-centered">
-                            {% if next_exercise %}
-                                <a href="{% url 'exercise-detail' next_exercise.lesson.course.slug next_exercise.lesson.slug next_exercise.slug %}" class="button is-primary">
-                                    Next
-                                </a>
-                            {% else %}
-                                {% if next_lesson %}
-                                <a href="{% url 'lesson-detail' next_lesson.course.slug next_lesson.slug %}" class="button is-primary">
+    <div class="columns">
+        <div id="side-menu" class="column is-2 hero is-fullheight is-hidden-mobile" v-cloak>
+            <div class="container">
+                <nav class="level">
+                    <p class="level-item has-text-centered">
+                        {% if prev_exercise %}
+                            <a href="{% url 'exercise-detail' prev_exercise.lesson.course.slug prev_exercise.lesson.slug prev_exercise.slug %}"
+                               class="button is-primary">
+                                Back
+                            </a>
+                        {% else %}
+                            <a class="button is-primary is-disabled">
+                                Back
+                            </a>
+                        {% endif %}
+                    </p>
+                    <p class="level-item has-text-centered">
+                        {{ exercise.order }} / {{ exercise_count }}
+                    </p>
+                    <p class="level-item has-text-centered">
+                        {% if next_exercise %}
+                            <a href="{% url 'exercise-detail' next_exercise.lesson.course.slug next_exercise.lesson.slug next_exercise.slug %}"
+                               class="button is-primary">
+                                Next
+                            </a>
+                        {% else %}
+                            {% if next_lesson %}
+                                <a href="{% url 'lesson-detail' next_lesson.course.slug next_lesson.slug %}"
+                                   class="button is-primary">
                                     Next lesson
                                 </a>
-                                {% else %}
+                            {% else %}
                                 <a href="{% url 'learn' %}" class="button is-primary">
                                     Home
                                 </a>
-                                {% endif %}
-
                             {% endif %}
-                        </p>
-                    </nav>
 
-                    <div class="panel">
-                        <div class="panel-heading">
-                            Learn
-                        </div>
-                        <div class="panel-block">
-                            <div class="content">
-                                {{ exercise.description | safe }}
-                            </div>
+                        {% endif %}
+                    </p>
+                </nav>
+
+                <div class="panel">
+                    <div class="panel-heading">
+                        Learn
+                    </div>
+                    <div class="panel-block">
+                        <div class="content">
+                            {{ exercise.description | safe }}
                         </div>
                     </div>
-                    <div class="panel">
-                        <div class="panel-heading">
-                            <div class="level">
-                                <p>Instructions</p>
-                                <button class="button is-primary" @click="checkLastInstruction()">Check</button>
-                            </div>
-
+                </div>
+                <div class="panel">
+                    <div class="panel-heading">
+                        <div class="level">
+                            <p>Instructions</p>
+                            <button class="button is-primary" @click="checkLastInstruction()">Check</button>
                         </div>
-                        <div class="panel-block">
-                            <div class="level" :class="{'not-active': currentInstruction != instruction}"
-                                 v-for="instruction in instructions">
-                                <div class="level-left">
-                                    <div class="level-item">
+
+                    </div>
+                    <div class="panel-block">
+                        <div class="level" :class="{'not-active': currentInstruction != instruction}"
+                             v-for="instruction in instructions">
+                            <div class="level-left">
+                                <div class="level-item">
                                             <span class="icon">
                                                 <i class="fa"
                                                    :class="{'fa-check-square-o': instruction.completed, 'fa-square-o': !instruction.completed}"></i>
                                             </span>
-                                    </div>
-                                    <div class="level-item">
-                                        <p>
-                                            [[ instruction.order ]]. [[instruction.description ]]
-                                        </p>
-                                    </div>
+                                </div>
+                                <div class="level-item">
+                                    <p>
+                                        [[ instruction.order ]]. [[instruction.description ]]
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-            </div>
-            <div class="column is-8 is-paddingless">
-                <div id="map"></div>
-            </div>
-            <div class="column is-2 hero">
-                <aside class="menu" id="right-menu">
-                    <div class="panel">
-                        <div class="panel-heading">
-                            GIS operations
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <div class="level-left">
-                                    <button class="button" @click="toggleDialog('buffer')">Buffer</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <div class="level-item">
-                                    <button class="button" @click="toggleDialog('intersect')">Intersect</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <div class="level-item">
-                                    <button class="button" @click="toggleDialog('union')">Union</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <div class="level-item">
-                                    <button class="button" @click="toggleDialog('difference')">Difference</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <div class="level-item">
-                                    <button class="button" @click="toggleDialog('mergeSelected')">Merge to layer</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <div class="panel-heading">
-                            <div class="level">
-                                <p>Layers on the map</p>
-                                <button class="button is-small is-primary" @click="toggleDialog('upload')">Add</button>
-                            </div>
 
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <button class="button is-small" @click="bringSelectedLayersToFront()">Bring to front</button>
-
-                                <button class="button is-small is-danger" @click="deleteSelectedLayers()">Delete</button>
-                            </div>
-                        </div>
-                        <div class="panel-block" v-for="layer in layers">
-                            <div class="level">
-                                <div class="level-left">
-                                    <input type="checkbox" v-model="layer.checked" @click="highlightSelectedLayer(layer)">
-                                </div>
-                                <div class="level-right">
-                                     <p>[[ layer.name ]]</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <div class="panel-heading">
-                            Selected features
-                        </div>
-                        <div class="panel-block">
-                            <div class="level">
-                                <button class="button is-small is-danger" @click="toggleDialog('mergeSelected')">Delete</button>
-                            </div>
-                        </div>
-                        <div class="panel-block" v-for="layer in selectedFeatures">
-                            <p>Id: [[ layer.feature.id ]] Type: [[layer.feature.geometry.type ]]</p>
-                        </div>
-                    </div>
-                </aside>
             </div>
         </div>
-
-        <div id="buffer-dialog" class="modal" v-bind:class="{'is-active': dialogs.buffer}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Buffer</p>
-                    <button @click="toggleDialog('buffer')" class="delete"></button>
-                </header>
-                <section class="modal-card-body">
-                    <label class="label">Name</label>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
-                    </p>
-                    <label class="label">Size</label>
-                    <p class="control">
-                      <input class="input" type="number" placeholder="Buffer size in meters" v-model="bufferSize">
-                    </p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a @click="doGisOperation('buffer', {'size': bufferSize, 'layer_name': newLayerName})" class="button is-primary">Buffer</a>
-                    <a @click="toggleDialog('buffer')" class="button">Cancel</a>
-                </footer>
-            </div>
-        </div>
-        <div id="intersect-dialog" class="modal" v-bind:class="{'is-active': dialogs.intersect}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Intersect</p>
-                    <button @click="toggleDialog('intersect')" class="delete"></button>
-                </header>
-                <section class="modal-card-body">
-                    <label class="label">Name</label>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
-                    </p>
-                    <label class="label">Features</label>
-                    <p v-for="layer in selectedFeatures">
-                        [[layer.feature.geometry.type ]]
-                    </p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a @click="doGisOperation('intersect', {'layer_name': newLayerName})" class="button is-primary">Intersect</a>
-                    <a @click="toggleDialog('intersect')" class="button">Cancel</a>
-                </footer>
-            </div>
-        </div>
-
-        <div id="merge-selected-dialog" class="modal" v-bind:class="{'is-active': dialogs.mergeSelected}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Merge selected features</p>
-                    <button @click="toggleDialog('mergeSelected')" class="delete"></button>
-                </header>
-                <section class="modal-card-body">
-                    <label class="label">Name</label>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
-                    </p>
-                    <label class="label">Features</label>
-                    <p v-for="layer in selectedFeatures">
-                        [[layer.feature.geometry.type ]]
-                    </p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a @click="doGisOperation('merge', {'layer_name': newLayerName})" class="button is-primary">Merge</a>
-                    <a @click="toggleDialog('mergeSelected')" class="button">Cancel</a>
-                </footer>
-            </div>
-        </div>
-
-        <div id="union-dialog" class="modal" v-bind:class="{'is-active': dialogs.union}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Union</p>
-                    <button @click="toggleDialog('union')" class="delete"></button>
-                </header>
-                <section class="modal-card-body">
-                    <label class="label">Name</label>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
-                    </p>
-                    <label class="label">Features</label>
-                    <p v-for="layer in selectedFeatures">
-                        [[layer.feature.geometry.type ]]
-                    </p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a @click="doGisOperation('union', {'layer_name': newLayerName})" class="button is-primary">Union</a>
-                    <a @click="toggleDialog('union')" class="button">Cancel</a>
-                </footer>
-            </div>
-        </div>
-
-        <div id="difference-dialog" class="modal" v-bind:class="{'is-active': dialogs.difference}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Difference</p>
-                    <button @click="toggleDialog('difference')" class="delete"></button>
-                </header>
-                <section class="modal-card-body">
-                    <label class="label">Name</label>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
-                    </p>
-                    <label class="label">Features</label>
-                    <p v-for="layer in selectedFeatures">
-                        [[layer.feature.geometry.type ]]
-                    </p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a @click="doGisOperation('difference', {'layer_name': newLayerName})" class="button is-primary">Union</a>
-                    <a @click="toggleDialog('difference')" class="button">Cancel</a>
-                </footer>
-            </div>
-        </div>
-
-        <div id="completed-dialog" class="modal" v-bind:class="{'is-active': dialogs.completed}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Congratulations!</p>
-                </header>
-                <section class="modal-card-body">
-                    <p>You just completed this lesson. Click next to continue with the next exercise</p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a class="button is-primary">Next exercise or course</a>
-                    <a href="/" class="button">Home</a>
-                </footer>
-            </div>
-        </div>
-        <div id="upload-dialog" class="modal" v-bind:class="{'is-active': dialogs.upload}">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Add</p>
-                    <button @click="toggleDialog('upload')" class="delete"></button>
-                </header>
-                <section class="modal-card-body">
-                    <label class="label">Name</label>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
-                    </p>
-                    <label class="label">File</label>
-                    <p class="control">
-                        <input type="file" @change="setFile($event)">
-                    </p>
-                </section>
-                <footer class="modal-card-foot">
-                    <a class="button is-primary" @click="addLayerFromFile()">Add</a>
-                    <a @click="toggleDialog('upload')" class="button">Cancel</a>
-                </footer>
-            </div>
+        <div class="column is-10">
+            {% include 'gisapp.html' %}
         </div>
     </div>
 
@@ -360,66 +117,26 @@
 {% block footer %}
 {% endblock %}
 {% block js %}
-    <script src="https://npmcdn.com/@turf/turf@3.5.1/turf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
-    <script src="{% static 'js/shp2geojson/jszip.js' %}"></script>
-    <script src="{% static 'js/shp2geojson/jszip-utils.js' %}"></script>
-    <!--[if IE]>
-    <script type="text/javascript" src="{% static 'js/shp2geojson/jszip-utils-ie.js' %}"></script>
-    <![endif]-->
-    <script src="{% static 'js/shp2geojson/preprocess.js' %}"></script>
-    <script src="{% static 'js/shp2geojson/preview.js' %}"></script>
+    <script src="{% static 'js/gisapp.js' %}"></script>
     <script>
         var exerciseSlug = "{{ exercise.slug }}";
         // Set the center for the map defined by the exercise.
         var map_center_lat = {{ map_center_lat }};
         var map_center_lng = {{ map_center_lng }};
+        GISApp.setCenter(map_center_lat, map_center_lng, 13);
 
         var vue = new Vue({
-            el: '#app',
+            el: '#side-menu',
             delimiters: ["[[", "]]"],
-            // Add the gisoperationsmixin so we can use the operations api.
-            mixins: [gisOperationsMixin],
             data: {
-                defaultStyle: {
-                    "color": "#4b7eff",
-                    "weight": 5,
-                    "opacity": 1,
-                    "fillOpacity": 0.7
-                },
                 hasCompletedExercise: false,
-                newLayerName: '',
-                file: null,
-                bufferSize: null,
                 currentInstruction: null,
                 instructions: [],
-                layers: [],
-                selectedFeatures: [],
-                lineStringLayer: null,
-                polygonLayer: null,
-                geoJson: null,
-                map: null,
                 dialogs: {
-                    'buffer': false,
-                    'intersect': false,
                     'completed': false,
-                    'mergeSelected': false,
-                    'union': false,
-                    'difference': false,
-                    'upload': false
-                },
-                operations: []
+                }
             },
             mounted: function () {
-                this.map = L.map('map').setView([map_center_lat, map_center_lng], 13);
-                L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(this.map);
-
-                this.map.on('click', function (e) {
-                    vue.resetSelectedFeatures();
-                });
-
                 this.fetchData();
             },
             methods: {
@@ -446,103 +163,11 @@
 
                 },
                 handleResponse: function (response) {
-                    this.layers = response.body.layers;
-                    // Add the user layers if they have any for this exercise
-                    this.layers = this.layers.concat(response.body.user_layers);
-                    for (var i = 0; i < this.layers.length; i++) {
-                        var layer = this.layers[i];
-
-                        var geoJson = L.geoJSON(layer.points.features, {
-                            style: this.defaultStyle,
-                            onEachFeature: this.onEachFeature
-                        }).addTo(this.map);
-
-                        geoJson.addData(layer.polygons.features);
-                        geoJson.addData(layer.linestrings.features);
-                        layer.leafletLayer = geoJson;
-                        layer.checked = false;
-                    }
-                },
-                onEachFeature: function (feature, layer) {
-                    //bind click
-                    layer.on({
-                        click: this.whenClicked,
-                        mouseover: this.onMouseOver,
-                        mouseout: this.onMouseOut
-                    });
-                },
-                whenClicked: function (e) {
-                    L.DomEvent.stopPropagation(e);
-                    this.addOrRemoveFeatureFromList(e.target);
+                    var layers = response.body.layers;
+                    layers = layers.concat(response.body.user_layers);
+                    GISApp.addData(layers);
                 },
 
-                onMouseOver: function (e) {
-                    this.highlightFeature(e.target);
-                },
-                onMouseOut: function (e) {
-                    this.resetHighlight(e.target);
-                },
-                highlightSelectedLayer: function (layer) {
-                    // FIXME disabled because the reset does not work.
-                    return;
-
-                    var leafletLayer = layer.leafletLayer;
-
-                    if (layer.checked){
-                        console.log('reset');
-                        leafletLayer.setStyle(this.defaultSyle);
-                    }
-                    if (!layer.checked) {
-                        leafletLayer.setStyle({
-                            weight: 5,
-                            color: '#23c6ff',
-                            dashArray: '',
-                            fillOpacity: 0.7
-                        });
-                    }
-                },
-                highlightFeature: function (layer) {
-                    if (layer._icon) {
-                        // Points cant be resized stock
-                        // TODO implement
-                    }else {
-                        layer.setStyle({
-                            weight: 5,
-                            color: '#23c6ff',
-                            dashArray: '',
-                            fillOpacity: 0.7
-                        });
-                    }
-                },
-                resetHighlight: function (target, force) {
-                    for (var i = 0; i < this.layers.length; i++) {
-                        var layer = this.layers[i];
-                        if (this.selectedFeatures.indexOf(target) === -1) {
-                            layer.leafletLayer.resetStyle(target);
-                        }
-                    }
-                },
-                resetSelectedFeatures: function () {
-                    // When the map is clicked we want to reset the selected features
-                    var resetFeatures = vue.selectedFeatures.slice();
-                    vue.selectedFeatures = [];
-
-                    for (var i = 0; i < resetFeatures.length; i++) {
-                        var feature = resetFeatures[i];
-                        vue.resetHighlight(feature);
-                    }
-
-                },
-                addOrRemoveFeatureFromList: function (layer) {
-                    var index = this.selectedFeatures.indexOf(layer);
-                    if (index === -1) {
-                        this.selectedFeatures.push(layer);
-                        this.highlightFeature(layer);
-
-                    } else {
-                        this.selectedFeatures.splice(index, 1);
-                    }
-                },
                 toggleDialog: function (dialogName) {
                     this.dialogs[dialogName] = !this.dialogs[dialogName];
                 },
@@ -554,7 +179,7 @@
                     }
                 },
                 checkLastInstruction: function () {
-                    var last = this.operations[this.operations.length - 1];
+                    var last = GISApp.operations[GISApp.operations.length - 1];
                     if (!last) {
                         return;
                     }
@@ -588,44 +213,6 @@
                         })
                     }
                 },
-                deleteSelectedLayers: function () {
-                    for (var i = 0; i < this.layers.length; i++) {
-                        var layer = this.layers[i];
-                        if (!layer.checked || !layer.user) continue;
-                        this.map.removeLayer(layer.leafletLayer);
-
-                        // Remove the layer from the layers list
-                        this.layers.splice(i, 1);
-                        this.deleteLayer(layer);
-                    }
-                },
-                bringSelectedLayersToFront: function () {
-                    for (var i = 0; i < this.layers.length; i++) {
-                        var layer = this.layers[i];
-                        if (!layer.checked) continue;
-                        var lf = layer.leafletLayer;
-                        lf.bringToFront();
-                    }
-                },
-                setFile: function (e) {
-                    var file = e.target.files[0];
-                    this.file = file;
-                },
-                addLayerFromFile: function () {
-                    if (!this.file) return;
-                    if (this.file.name.split('.')[1] == 'zip') {
-                        loadshp({
-                            url: this.file,
-                            encoding: 'utf-8',
-                            EPSG: 4326
-                        }, function (geojson) {
-                            vue.toggleDialog('upload');
-                            var data = L.geoJSON(geojson,{onEachFeature: vue.onEachFeature});
-                            data.addTo(vue.map);
-                            vue.map.fitBounds(data.getBounds());
-                        })
-                    }
-                }
             }
         });
     </script>
