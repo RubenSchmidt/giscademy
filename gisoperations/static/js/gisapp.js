@@ -67,6 +67,19 @@ var GISApp = new Vue({
             this.layers = this.layers.concat(layers);
         },
         onEachFeature: function (feature, layer) {
+
+            var props = feature.properties;
+            if (props) {
+                var body = "<table class='table'>";
+                for (var key in props) {
+                    if (props.hasOwnProperty(key)) {
+                        body +=
+								('<tr><td>'+ key + '</td><td>' + props[key] + '</td></tr>');
+                    }
+                }
+                body += "</table>";
+                layer.bindPopup(body);
+            }
             //bind click and mouse events.
             layer.on({
                 click: this.whenClicked,
@@ -77,7 +90,7 @@ var GISApp = new Vue({
         whenClicked: function (e) {
             // Stop propagation so only the feature click is fired and not the map click.
             L.DomEvent.stopPropagation(e);
-
+            e.target.openPopup();
             this.addOrRemoveFeatureFromList(e.target);
         },
 

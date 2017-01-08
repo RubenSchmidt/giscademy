@@ -6,6 +6,21 @@ from layers.models import Polygon, Point, LineString
 
 
 class OperationsMixin(object):
+
+    @staticmethod
+    def get_layer(json):
+        ds = DataSource(json)
+        return ds[0]
+
+    @staticmethod
+    def extract_properties(feature):
+        fields = feature.fields
+        properties = {}
+        for field in fields:
+            name = field.decode('UTF-8')
+            properties[name] = feature.get(name)
+        return properties
+
     @staticmethod
     def difference_features(json, layer, **kwargs):
         ds = DataSource(json)
@@ -31,25 +46,20 @@ class OperationsMixin(object):
         """
         Add all the features in the json to a single layer.
         """
-        ds = DataSource(json)
-        lyr = ds[0]
+        lyr = OperationsMixin.get_layer(json)
         for feature in lyr:
-            print(feature)
-
-        geoms = ds[0].get_geoms(geos=True)
-        for geom in geoms:
-            geom_type = geom.geom_type
-            if geom_type == 'Point':
-                Point.objects.create(geom=geom, layer=layer)
-
-            if geom_type == 'LineString':
-                LineString.objects.create(geom=geom, layer=layer)
-
-            if geom_type == 'Polygon':
-                Polygon.objects.create(geom=MultiPolygon(geom), layer=layer)
-
-            if geom_type == 'MultiPolygon':
-                Polygon.objects.create(geom=geom, layer=layer)
+            geom_type = feature.geom_type
+            type_name = geom_type.name
+            geos = feature.geom.geos
+            properties = OperationsMixin.extract_properties(feature)
+            if type_name == 'Point':
+                Point.objects.create(geom=geos, layer=layer, properties=properties)
+            elif type_name == 'LineString':
+                LineString.objects.create(geom=geos, layer=layer, properties=properties)
+            elif type_name == 'Polygon':
+                Polygon.objects.create(geom=MultiPolygon(geos), layer=layer, properties=properties)
+            elif type_name == 'MultiPolygon':
+                Polygon.objects.create(geom=geos, layer=layer, properties=properties)
         return layer
 
     @staticmethod

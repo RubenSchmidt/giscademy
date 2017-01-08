@@ -1,15 +1,13 @@
-import serpy
-import json
-from django.core.serializers import serialize
-from rest_framework_gis import serializers
+from rest_framework import serializers
+from rest_framework_gis import serializers as gis_serializers
 
-from layers.models import Feature, Point, LineString, Polygon, Layer
+from layers.models import Point, LineString, Polygon, Layer
 
 
-class BaseGeofeatureSerializer(serializers.GeoFeatureModelSerializer):
+class BaseGeofeatureSerializer(gis_serializers.GeoFeatureModelSerializer):
     def get_properties(self, instance, fields):
         # TODO show properties JSON field.
-        return {'id': instance.id}
+        return instance.properties
 
 
 class PointSerializer(BaseGeofeatureSerializer):
