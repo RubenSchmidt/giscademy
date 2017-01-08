@@ -1,4 +1,4 @@
-<div id="gisapp">
+<div id="gisapp" xmlns:v-bind="http://www.w3.org/1999/xhtml">
     <div class="columns">
         <div class="column is-paddingless">
             <div id="map"></div>
@@ -208,7 +208,7 @@
             </section>
             <footer class="modal-card-foot">
                 <a @click="doGisOperation('difference', {'layer_name': newLayerName})"
-                   class="button is-primary">Union</a>
+                   class="button is-primary">Difference</a>
                 <a @click="toggleDialog('difference')" class="button">Cancel</a>
             </footer>
         </div>

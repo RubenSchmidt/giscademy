@@ -30,6 +30,7 @@ class Feature(Timestampable):
     layer = models.ForeignKey(
         'layers.Layer'
     )
+    properties = JSONField(null=True, blank=True)
 
     class Meta:
         abstract = True

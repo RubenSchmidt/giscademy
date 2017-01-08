@@ -1,14 +1,13 @@
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import MultiPolygon
 
 from gisoperations.services.buffers import with_metric_buffer
-from layers.models import Layer, Polygon, Point, LineString
+from layers.models import Polygon, Point, LineString
 
 
 class OperationsMixin(object):
     @staticmethod
-    def create_difference_layer(json, layer, **kwargs):
+    def difference_features(json, layer, **kwargs):
         ds = DataSource(json)
         geoms = ds[0].get_geoms(geos=True)
         base_geom = geoms[0]
@@ -18,7 +17,7 @@ class OperationsMixin(object):
         return layer
 
     @staticmethod
-    def create_union_layer(json, layer, **kwargs):
+    def unite_features(json, layer, **kwargs):
         ds = DataSource(json)
         geoms = ds[0].get_geoms(geos=True)
         base_geom = geoms[0]
@@ -28,8 +27,15 @@ class OperationsMixin(object):
         return layer
 
     @staticmethod
-    def create_merge_layer(json, layer, **kwargs):
+    def add_all_features_to_layer(json, layer, **kwargs):
+        """
+        Add all the features in the json to a single layer.
+        """
         ds = DataSource(json)
+        lyr = ds[0]
+        for feature in lyr:
+            print(feature)
+
         geoms = ds[0].get_geoms(geos=True)
         for geom in geoms:
             geom_type = geom.geom_type
@@ -47,7 +53,7 @@ class OperationsMixin(object):
         return layer
 
     @staticmethod
-    def create_buffer_layer(json, layer, **kwargs):
+    def buffer_features(json, layer, **kwargs):
         ds = DataSource(json)
         geoms = ds[0].get_geoms(geos=True)
         for geom in geoms:
@@ -57,7 +63,7 @@ class OperationsMixin(object):
         return layer
 
     @staticmethod
-    def create_intersection_layer(json, layer, **kwargs):
+    def intersect_features(json, layer, **kwargs):
         ds = DataSource(json)
         geoms = ds[0].get_geoms(geos=True)
         base_geom = geoms[0]

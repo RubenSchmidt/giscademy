@@ -14,7 +14,6 @@ class GISOperationSerializer(serializers.Serializer, OperationsMixin):
     geojson = serializers.JSONField()
     extra_args = serializers.JSONField()
 
-    operation_function = None
     extra_args_list = ['layer_name']
 
     def validate(self, attrs):
@@ -36,15 +35,17 @@ class GISOperationSerializer(serializers.Serializer, OperationsMixin):
     def _get_operation_function(self, validated_data):
         operation = validated_data['operation']
         if operation == 'buffer':
-            return self.create_buffer_layer
+            return self.buffer_features
         elif operation == 'intersect':
-            return self.create_intersection_layer
+            return self.intersect_features
         elif operation == 'merge':
-            return self.create_merge_layer
+            return self.add_all_features_to_layer
         elif operation == 'union':
-            return self.create_union_layer
+            return self.unite_features
         elif operation == 'difference':
-            return self.create_difference_layer
+            return self.difference_features
+        elif operation == 'import':
+            return self.add_all_features_to_layer
         else:
             raise NotImplementedError
 

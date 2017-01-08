@@ -1,11 +1,9 @@
 /**
  * Created by rubenschmidt on 26.12.2016.
  */
-Vue.component('gisapp', {
-    // options
-})
 var GISApp = new Vue({
     el: '#gisapp',
+    // Custom delimiters so we do not interfere with django natives.
     delimiters: ["[[", "]]"],
     // Add the gisoperationsmixin so we can use the operations api.
     mixins: [gisOperationsMixin],
@@ -38,7 +36,10 @@ var GISApp = new Vue({
 
     },
     mounted: function () {
+        // When the app is ready. Add the map.
         this.map = L.map('map').setView([0, 0], 2);
+
+        // Add OSM tilelayer as basemap.
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(this.map);
@@ -66,7 +67,7 @@ var GISApp = new Vue({
             this.layers = this.layers.concat(layers);
         },
         onEachFeature: function (feature, layer) {
-            //bind click
+            //bind click and mouse events.
             layer.on({
                 click: this.whenClicked,
                 mouseover: this.onMouseOver,
@@ -74,7 +75,9 @@ var GISApp = new Vue({
             });
         },
         whenClicked: function (e) {
+            // Stop propagation so only the feature click is fired and not the map click.
             L.DomEvent.stopPropagation(e);
+
             this.addOrRemoveFeatureFromList(e.target);
         },
 
@@ -186,12 +189,11 @@ var GISApp = new Vue({
                     encoding: 'utf-8',
                     EPSG: 4326
                 }, function (geojson) {
+                    console.log(geojson);
                     GISApp.toggleDialog('upload');
-                    var data = L.geoJSON(geojson, {onEachFeature: GISApp.onEachFeature});
-                    data.addTo(GISApp.map);
-                    GISApp.map.fitBounds(data.getBounds());
+                    GISApp.importJson(geojson, GISApp.newLayerName);
                 })
             }
-        }
+        },
     }
 });
