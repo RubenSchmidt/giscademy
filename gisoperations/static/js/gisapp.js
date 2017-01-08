@@ -70,7 +70,7 @@ var GISApp = new Vue({
 
             var props = feature.properties;
             if (props) {
-                var body = "<table class='table'>";
+                var body = "<table class='table is-bordered'>";
                 for (var key in props) {
                     if (props.hasOwnProperty(key)) {
                         body +=
