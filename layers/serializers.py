@@ -6,7 +6,6 @@ from layers.models import Point, LineString, Polygon, Layer
 
 class BaseGeofeatureSerializer(gis_serializers.GeoFeatureModelSerializer):
     def get_properties(self, instance, fields):
-        # TODO show properties JSON field.
         return instance.properties
 
 
