@@ -33,7 +33,7 @@ var gisOperationsMixin = {
                 'geojson': geojson,
                 'extra_args': extraArgs
             };
-            this.$http.post('/gis-operations/operation/', data)
+            this.$http.post('/gis-operations/operation/', data, {'timeout': 0})
                 .then(this.handleOperationResponse, this.handleError);
         },
         doGisOperation: function (operationName, extraArgs) {

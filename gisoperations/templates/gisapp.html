@@ -50,7 +50,9 @@
                     <div class="panel-heading">
                         <div class="level">
                             <p>Layers on the map</p>
-                            <button class="button is-small is-primary" @click="toggleDialog('upload')">Add</button>
+                            <button class="button is-small is-primary" @click="toggleDialog('upload')"
+                                    v-bind:class="{'is-loading': loadingLayers }">Add
+                            </button>
                         </div>
 
                     </div>
@@ -109,6 +111,20 @@
                 <p class="control">
                     <input class="input" type="number" placeholder="Buffer size in meters" v-model="bufferSize">
                 </p>
+                <div class="level">
+                    <div class="level-item">
+                        <label class="label">Selected features</label>
+                        <p v-for="layer in selectedFeatures">
+                            [[layer.feature.geometry.type ]]
+                        </p>
+                    </div>
+                    <div class="level-item">
+                        <label class="label">Selected layers</label>
+                        <p v-for="layer in selectedLayers">
+                            [[layer.name ]]
+                        </p>
+                    </div>
+                </div>
             </section>
             <footer class="modal-card-foot">
                 <a @click="doGisOperation('buffer', {'size': bufferSize, 'layer_name': newLayerName})"
@@ -129,10 +145,20 @@
                 <p class="control">
                     <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
                 </p>
-                <label class="label">Features</label>
-                <p v-for="layer in selectedFeatures">
-                    [[layer.feature.geometry.type ]]
-                </p>
+                <div class="level">
+                    <div class="level-item">
+                        <label class="label">Selected features</label>
+                        <p v-for="layer in selectedFeatures">
+                            [[layer.feature.geometry.type ]]
+                        </p>
+                    </div>
+                    <div class="level-item">
+                        <label class="label">Selected layers</label>
+                        <p v-for="layer in selectedLayers">
+                            [[layer.name ]]
+                        </p>
+                    </div>
+                </div>
             </section>
             <footer class="modal-card-foot">
                 <a @click="doGisOperation('intersect', {'layer_name': newLayerName})" class="button is-primary">Intersect</a>
@@ -153,10 +179,20 @@
                 <p class="control">
                     <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
                 </p>
-                <label class="label">Features</label>
-                <p v-for="layer in selectedFeatures">
-                    [[layer.feature.geometry.type ]]
-                </p>
+                <div class="level">
+                    <div class="level-item">
+                        <label class="label">Selected features</label>
+                        <p v-for="layer in selectedFeatures">
+                            [[layer.feature.geometry.type ]]
+                        </p>
+                    </div>
+                    <div class="level-item">
+                        <label class="label">Selected layers</label>
+                        <p v-for="layer in selectedLayers">
+                            [[layer.name ]]
+                        </p>
+                    </div>
+                </div>
             </section>
             <footer class="modal-card-foot">
                 <a @click="doGisOperation('merge', {'layer_name': newLayerName})" class="button is-primary">Merge</a>
@@ -177,10 +213,20 @@
                 <p class="control">
                     <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
                 </p>
-                <label class="label">Features</label>
-                <p v-for="layer in selectedFeatures">
-                    [[layer.feature.geometry.type ]]
-                </p>
+                <div class="level">
+                    <div class="level-item">
+                        <label class="label">Selected features</label>
+                        <p v-for="layer in selectedFeatures">
+                            [[layer.feature.geometry.type ]]
+                        </p>
+                    </div>
+                    <div class="level-item">
+                        <label class="label">Selected layers</label>
+                        <p v-for="layer in selectedLayers">
+                            [[layer.name ]]
+                        </p>
+                    </div>
+                </div>
             </section>
             <footer class="modal-card-foot">
                 <a @click="doGisOperation('union', {'layer_name': newLayerName})" class="button is-primary">Union</a>
@@ -201,10 +247,21 @@
                 <p class="control">
                     <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
                 </p>
-                <label class="label">Features</label>
-                <p v-for="layer in selectedFeatures">
-                    [[layer.feature.geometry.type ]]
-                </p>
+                <div class="level">
+                    <div class="level-item">
+                        <label class="label">Selected features</label>
+                        <p v-for="layer in selectedFeatures">
+                            [[layer.feature.geometry.type ]]
+                        </p>
+                    </div>
+                    <div class="level-item">
+                        <label class="label">Selected layers</label>
+                        <p v-for="layer in selectedLayers">
+                            [[layer.name ]]
+                        </p>
+                    </div>
+                </div>
+
             </section>
             <footer class="modal-card-foot">
                 <a @click="doGisOperation('difference', {'layer_name': newLayerName})"
@@ -221,6 +278,7 @@
                 <button @click="toggleDialog('upload')" class="delete"></button>
             </header>
             <section class="modal-card-body">
+
                 <label class="label">Name</label>
                 <p class="control">
                     <input class="input" type="text" placeholder="Layer name" v-model="newLayerName">
@@ -229,11 +287,23 @@
                 <p class="control">
                     <input type="file" @change="setFile($event)">
                 </p>
+                <p>You can either upload a <strong>.zip</strong> file containing at least <strong>.shp .dbf
+                    .prj</strong></p>
+                <p>or you can upload a <strong>.geojson</strong> file containing geojson.</p>
             </section>
             <footer class="modal-card-foot">
                 <a class="button is-primary" @click="addLayerFromFile()">Add</a>
                 <a @click="toggleDialog('upload')" class="button">Cancel</a>
             </footer>
+        </div>
+    </div>
+    <div id="error-dialog" class="modal" v-bind:class="{'is-active': dialogs.error}">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="notification is-danger">
+                <button class="delete" @click="toggleDialog('error')"></button>
+                Oops! Something went wrong :(
+            </div>
         </div>
     </div>
 </div>

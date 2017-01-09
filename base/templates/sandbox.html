@@ -15,16 +15,19 @@
 {% block footer %}
 {% endblock %}
 
-{% block js %}
+{% block js %}<script src="{% static 'js/shp.min.js' %}"></script>
 <script src="{% static 'js/gisapp.js' %}"></script>
 <script>
     var vue = new Vue({
         el:'#app',
         mounted: function () {
+                GISApp.loadingLayers = true;
                 this.$http.get('/layers/').then(function (response) {
+                    GISApp.loadingLayers = false;
                     GISApp.addData(response.body);
                 }, function (error) {
-
+                    GISApp.loadingLayers = false;
+                    GISApp.dialogs.error = true;
                 })
             }
     })

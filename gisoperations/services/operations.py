@@ -10,6 +10,7 @@ class OperationsMixin(object):
     @staticmethod
     def get_layer(json):
         ds = DataSource(json)
+        lyr = ds[0]
         return ds[0]
 
     @staticmethod
@@ -28,7 +29,11 @@ class OperationsMixin(object):
         base_geom = geoms[0]
         for geom in geoms[1:]:
             base_geom = base_geom.difference(geom)
-        Polygon.objects.create(geom=MultiPolygon(base_geom), layer=layer)
+        if base_geom.geom_type == 'MultiPolygon':
+            geom = base_geom
+        else:
+            geom = MultiPolygon(base_geom)
+        Polygon.objects.create(geom=geom, layer=layer)
         return layer
 
     @staticmethod
@@ -48,17 +53,18 @@ class OperationsMixin(object):
         """
         lyr = OperationsMixin.get_layer(json)
         for feature in lyr:
-            geom_type = feature.geom_type
-            type_name = geom_type.name
-            geos = feature.geom.geos
+            geom = feature.geom.clone()
+            geom.coord_dim = 2
+            geos = geom.geos
+            geom_type = geos.geom_type
             properties = OperationsMixin.extract_properties(feature)
-            if type_name == 'Point':
+            if geom_type == 'Point':
                 Point.objects.create(geom=geos, layer=layer, properties=properties)
-            elif type_name == 'LineString':
+            elif geom_type == 'LineString':
                 LineString.objects.create(geom=geos, layer=layer, properties=properties)
-            elif type_name == 'Polygon':
+            elif geom_type == 'Polygon':
                 Polygon.objects.create(geom=MultiPolygon(geos), layer=layer, properties=properties)
-            elif type_name == 'MultiPolygon':
+            elif geom_type == 'MultiPolygon':
                 Polygon.objects.create(geom=geos, layer=layer, properties=properties)
         return layer
 

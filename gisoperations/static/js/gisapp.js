@@ -15,6 +15,7 @@ var GISApp = new Vue({
             "fillOpacity": 0.7
         },
         newLayerName: '',
+        loadingLayers: false,
         file: null,
         bufferSize: null,
         layers: [],
@@ -30,7 +31,8 @@ var GISApp = new Vue({
             'mergeSelected': false,
             'union': false,
             'difference': false,
-            'upload': false
+            'upload': false,
+            'error': false
         },
         operations: []
 
@@ -47,6 +49,16 @@ var GISApp = new Vue({
         this.map.on('click', function (e) {
             GISApp.resetSelectedFeatures();
         });
+    },
+    computed: {
+        selectedLayers: function (){
+            var layers = [];
+            for (var i = 0; i < this.layers.length; i++) {
+                var obj = this.layers[i];
+                if (obj.checked) layers.push(obj);
+            }
+            return layers
+        }
     },
     methods: {
         setCenter: function (lat, lng, zoom) {
@@ -74,7 +86,7 @@ var GISApp = new Vue({
                 for (var key in props) {
                     if (props.hasOwnProperty(key)) {
                         body +=
-								('<tr><td>'+ key + '</td><td>' + props[key] + '</td></tr>');
+                            ('<tr><td>' + key + '</td><td>' + props[key] + '</td></tr>');
                     }
                 }
                 body += "</table>";
@@ -90,14 +102,15 @@ var GISApp = new Vue({
         whenClicked: function (e) {
             // Stop propagation so only the feature click is fired and not the map click.
             L.DomEvent.stopPropagation(e);
-            e.target.openPopup();
             this.addOrRemoveFeatureFromList(e.target);
         },
 
         onMouseOver: function (e) {
+            e.target.openPopup();
             this.highlightFeature(e.target);
         },
         onMouseOut: function (e) {
+            e.target.closePopup();
             this.resetHighlight(e.target);
         },
         highlightSelectedLayer: function (layer) {
@@ -196,16 +209,26 @@ var GISApp = new Vue({
         },
         addLayerFromFile: function () {
             if (!this.file) return;
+
+            var fileReader = new FileReader();
             if (this.file.name.split('.')[1] == 'zip') {
-                loadshp({
-                    url: this.file,
-                    encoding: 'utf-8',
-                    EPSG: 4326
-                }, function (geojson) {
+                fileReader.onload = function () {
+                    shp(this.result).then(function (geojson) {
+                        console.log(geojson);
+                        GISApp.toggleDialog('upload');
+                        GISApp.importJson(geojson, GISApp.newLayerName);
+                    });
+                };
+                fileReader.readAsArrayBuffer(this.file);
+            }
+            else if (this.file.name.split('.')[1] == 'geojson') {
+                fileReader.onload = function () {
+                    var geojson = JSON.parse(this.result);
                     console.log(geojson);
                     GISApp.toggleDialog('upload');
                     GISApp.importJson(geojson, GISApp.newLayerName);
-                })
+                };
+                fileReader.readAsText(this.file);
             }
         },
     }

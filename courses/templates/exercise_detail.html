@@ -143,6 +143,7 @@
                 fetchData: function () {
                     this.resetInstructions();
                     // Fetch the predefined data for the current exercise.
+                    GISApp.loadingLayers = true;
                     this.$http.get('/layers/' + exerciseSlug + '/').then(this.handleResponse, this.handleError)
                 },
                 resetInstructions: function () {
@@ -160,12 +161,14 @@
                     });
                 },
                 handleError: function () {
-
+                    GISApp.loadingLayers = false;
+                    GISApp.dialogs.error = true;
                 },
                 handleResponse: function (response) {
                     var layers = response.body.layers;
                     layers = layers.concat(response.body.user_layers);
                     GISApp.addData(layers);
+                    GISApp.loadingLayers = false;
                 },
 
                 toggleDialog: function (dialogName) {
