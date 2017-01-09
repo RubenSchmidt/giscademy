@@ -45,17 +45,6 @@
                         <progress class="progress is-primary" value="{{ course.user_progress }}" max="100">{{ course.user_progress }}%</progress>
                         <nav class="level">
                             <div class="level-left">
-                                <a class="level-item">
-                                    <span class="icon is-small"><i class="fa fa-reply"></i></span>
-                                </a>
-                                <a class="level-item">
-                                    <span class="icon is-small"><i class="fa fa-retweet"></i></span>
-                                </a>
-                                <a class="level-item">
-                                    <span class="icon is-small"><i class="fa fa-heart"></i></span>
-                                </a>
-                            </div>
-                            <div class="level-right">
                                 <a href="{% url 'learn-course-detail' course.slug %}" class="level-item button is-primary">
                                     Continue
                                 </a>

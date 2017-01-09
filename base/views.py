@@ -111,7 +111,7 @@ class CatalogView(ProtectedView):
         return HttpResponseRedirect(reverse('catalog'))
 
 
-class SandboxView(View):
+class SandboxView(ProtectedView):
     template_name = 'sandbox.html'
 
     def get(self, request):

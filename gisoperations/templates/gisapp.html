@@ -306,5 +306,14 @@
             </div>
         </div>
     </div>
+        <div id="completed-dialog" class="modal" v-bind:class="{'is-active': dialogs.completed}">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="notification is-success">
+                <button class="delete" @click="toggleDialog('completed')"></button>
+                Woho! You completed this lesson. Great job! Now press "home" in the left corner and try a new one.
+            </div>
+        </div>
+    </div>
 </div>
 
