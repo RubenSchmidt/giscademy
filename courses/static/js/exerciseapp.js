@@ -46,17 +46,6 @@ var vue = new Vue({
             GISApp.addData(layers);
             GISApp.loadingLayers = false;
         },
-
-        toggleDialog: function (dialogName) {
-            this.dialogs[dialogName] = !this.dialogs[dialogName];
-        },
-        clearDialogs: function () {
-            for (var property in this.dialogs) {
-                if (this.dialogs.hasOwnProperty(property)) {
-                    this.dialogs[property] = false;
-                }
-            }
-        },
         checkLastInstruction: function () {
             var last = GISApp.operations[GISApp.operations.length - 1];
             if (!last) {
