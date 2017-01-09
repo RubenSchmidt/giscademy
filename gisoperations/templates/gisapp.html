@@ -79,14 +79,11 @@
                     <div class="panel-heading">
                         Selected features
                     </div>
-                    <div class="panel-block">
-                        <div class="level">
-                            <button class="button is-small is-danger" @click="toggleDialog('mergeSelected')">Delete
-                            </button>
-                        </div>
-                    </div>
                     <div class="panel-block" v-for="layer in selectedFeatures">
                         <p>Id: [[ layer.feature.id ]] Type: [[layer.feature.geometry.type ]]</p>
+                    </div>
+                    <div class="panel-block" v-if="selectedFeatures.length == 0">
+                        <p>Click on a map feature to select it!</p>
                     </div>
                 </div>
             </aside>
