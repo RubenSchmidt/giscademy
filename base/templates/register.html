@@ -17,30 +17,32 @@
                             <form method="post" action="{% url 'register' %}">
                             {% csrf_token %}
                                 <label class="label">Email</label>
+                                <span class="help is-danger">{{ form.username.errors.0 }}</span>
                                 <p class="control">
-                                    <input class="input" name="username" type="text" placeholder="jsmith@example.org">
+                                    <input class="input {% if form.username.errors %} is-danger {% endif %}" name="username" type="text" placeholder="jsmith@example.org">
                                 </p>
                                 <hr>
                                 <label class="label">Password</label>
+                                <span class="help is-danger">{{ form.password1.errors.0 }}</span>
                                 <p class="control">
-                                    <input class="input" name="password1" type="password" placeholder="●●●●●●●">
+                                    <input class="input {% if form.password1.errors %} is-danger {% endif %}" name="password1" type="password" placeholder="●●●●●●●">
                                 </p>
                                 <label class="label">Confirm Password</label>
+                                <span class="help is-danger">{{ form.password2.errors.0 }}</span>
                                 <p class="control">
-                                    <input class="input" name="password2" type="password" placeholder="●●●●●●●">
+                                    <input class="input {% if form.password2.errors %} is-danger {% endif %}" name="password2" type="password" placeholder="●●●●●●●">
                                 </p>
                                 <hr>
+                                <span class="help is-danger">{{ form.non_field_errors.0 }}</span>
                                 <p class="control">
                                     <button type="submit" class="button is-primary">Register</button>
-                                    <button class="button is-default">Cancel</button>
+                                    <a href="{% url 'index' %}" class="button is-default">Cancel</a>
                                 </p>
                             </form>
-                            <span class="help is-danger">{{ form.non_field_errors.0 }}</span>
+
                         </div>
                         <p class="has-text-centered">
                             <a href="{% url 'login' %}">Login</a>
-                            |
-                            <a href="#">Need help?</a>
                         </p>
                     </div>
                 </div>
