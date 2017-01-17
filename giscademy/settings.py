@@ -136,3 +136,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 CKEDITOR_JQUERY_URL = '//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'
+
+try:
+    from .settings_local import *
+except ImportError:
+    pass
