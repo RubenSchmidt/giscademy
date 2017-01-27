@@ -82,7 +82,7 @@ var GISApp = new Vue({
                 geoJson.addData(layer.linestrings.features);
                 layer.leafletLayer = geoJson;
                 layer.checked = false;
-                geoJson.addTo(this.map);
+                layer.leafletLayer.addTo(this.map);
             }
             this.layers = this.layers.concat(layers);
         },
