@@ -29,7 +29,11 @@ class GISOperationSerializer(serializers.Serializer, OperationsMixin):
         layer_name = extra_args.get('layer_name')
         layer = Layer.objects.create(name=layer_name, exercise=exercise, user=self.context['request'].user)
         operation_function = self._get_operation_function(validated_data)
-        operation_function(json=json.dumps(validated_data['geojson']), layer=layer, **extra_args)
+        try:
+            operation_function(json=json.dumps(validated_data['geojson']), layer=layer, **extra_args)
+        except TypeError:
+            layer.delete()
+            raise serializers.ValidationError("Invalid geometry.")
         return layer
 
     def _get_operation_function(self, validated_data):

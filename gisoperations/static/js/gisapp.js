@@ -51,7 +51,7 @@ var GISApp = new Vue({
         });
     },
     computed: {
-        selectedLayers: function (){
+        selectedLayers: function () {
             var layers = [];
             for (var i = 0; i < this.layers.length; i++) {
                 var obj = this.layers[i];
@@ -67,16 +67,32 @@ var GISApp = new Vue({
         addData: function (layers) {
             for (var i = 0; i < layers.length; i++) {
                 var layer = layers[i];
+
+                var style = {
+                    "color": this.getRandomColor(),
+                    "weight": 5,
+                    "opacity": 1,
+                    "fillOpacity": 0.7
+                };
                 var geoJson = L.geoJSON(layer.points.features, {
-                    style: this.defaultStyle,
+                    style: style,
                     onEachFeature: this.onEachFeature
-                }).addTo(this.map);
+                })
                 geoJson.addData(layer.polygons.features);
                 geoJson.addData(layer.linestrings.features);
                 layer.leafletLayer = geoJson;
                 layer.checked = false;
+                geoJson.addTo(this.map);
             }
             this.layers = this.layers.concat(layers);
+        },
+        getRandomColor: function () {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.round(Math.random() * 15)];
+            }
+            return color;
         },
         onEachFeature: function (feature, layer) {
 
@@ -113,25 +129,6 @@ var GISApp = new Vue({
             e.target.closePopup();
             this.resetHighlight(e.target);
         },
-        highlightSelectedLayer: function (layer) {
-            // FIXME disabled because the reset does not work.
-            return;
-
-            var leafletLayer = layer.leafletLayer;
-
-            if (layer.checked) {
-                console.log('reset');
-                leafletLayer.setStyle(this.defaultSyle);
-            }
-            if (!layer.checked) {
-                leafletLayer.setStyle({
-                    weight: 5,
-                    color: '#23c6ff',
-                    dashArray: '',
-                    fillOpacity: 0.7
-                });
-            }
-        },
         highlightFeature: function (layer) {
             if (layer._icon) {
                 // Points cant be resized stock
@@ -145,7 +142,7 @@ var GISApp = new Vue({
                 });
             }
         },
-        resetHighlight: function (target, force) {
+        resetHighlight: function (target) {
             for (var i = 0; i < this.layers.length; i++) {
                 var layer = this.layers[i];
                 if (this.selectedFeatures.indexOf(target) === -1) {
@@ -231,5 +228,8 @@ var GISApp = new Vue({
                 fileReader.readAsText(this.file);
             }
         },
+        handleError: function () {
+
+        }
     }
 });

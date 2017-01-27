@@ -63,7 +63,7 @@ var gisOperationsMixin = {
             };
 
             this.$http.post('/gis-operations/operation/', data)
-                .then(this.handleOperationResponse, this.handleError);
+                .then(this.handleOperationResponse, this.handleErrorResponse);
 
             this.resetSelectedFeatures();
         },
@@ -84,6 +84,9 @@ var gisOperationsMixin = {
             this.layers.push(layer);
             // Zoom the map to the created layer.
             this.map.fitBounds(geojson.getBounds());
+        },
+        handleErrorResponse: function (response) {
+            this.toggleDialog('error')
         }
     }
 };
