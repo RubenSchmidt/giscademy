@@ -118,11 +118,11 @@ var GISApp = new Vue({
         whenClicked: function (e) {
             // Stop propagation so only the feature click is fired and not the map click.
             L.DomEvent.stopPropagation(e);
+            e.target.openPopup();
             this.addOrRemoveFeatureFromList(e.target);
         },
 
         onMouseOver: function (e) {
-            e.target.openPopup();
             this.highlightFeature(e.target);
         },
         onMouseOut: function (e) {
