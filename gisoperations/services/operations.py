@@ -75,7 +75,7 @@ class OperationsMixin(object):
         polygon_list = []
         # Buffer all the features.
         for geom in geoms:
-            buffered = with_metric_buffer(geom, kwargs['size'])
+            buffered = with_metric_buffer(geom, float(kwargs['size']))
             polygon_list.append(buffered)
         # Unite all the buffered features if there are more than one.
         base_poly = polygon_list[0]

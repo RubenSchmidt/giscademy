@@ -31,9 +31,9 @@ class GISOperationSerializer(serializers.Serializer, OperationsMixin):
         operation_function = self._get_operation_function(validated_data)
         try:
             operation_function(json=json.dumps(validated_data['geojson']), layer=layer, **extra_args)
-        except TypeError:
+        except TypeError as e:
             layer.delete()
-            raise serializers.ValidationError("Invalid geometry.")
+            raise serializers.ValidationError(e)
         return layer
 
     def _get_operation_function(self, validated_data):
