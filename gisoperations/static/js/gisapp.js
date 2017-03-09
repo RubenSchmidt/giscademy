@@ -166,7 +166,7 @@ var GISApp = new Vue({
                 var layer = this.layers[i];
                 layer.checked = false;
                 // Vue.set
-                Vue.set(this.layers, i, false);
+                Vue.set(this.layers, i, layer);
             }
         },
         addOrRemoveFeatureFromList: function (layer) {
