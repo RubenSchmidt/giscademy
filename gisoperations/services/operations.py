@@ -71,19 +71,15 @@ class OperationsMixin(object):
     def buffer_features(json, layer, **kwargs):
         ds = DataSource(json)
         geoms = ds[0].get_geoms(geos=True)
-        polygon_list = []
-        # Buffer all the features.
-        for geom in geoms:
-            buffered = with_metric_buffer(geom, float(kwargs['size']))
-            polygon_list.append(buffered)
-        # Unite all the buffered features if there are more than one.
-        base_poly = polygon_list[0]
-        for polygon in polygon_list[1:]:
-            base_poly = base_poly.union(polygon)
-        if base_poly.geom_type == 'MultiPolygon':
-            Polygon.objects.create(geom=base_poly, layer=layer)
+        # Merge all the layers first
+        base_geom = geoms[0]
+        for geom in geoms[1:]:
+            base_geom = base_geom.union(geom)
+        buffered = with_metric_buffer(base_geom, float(kwargs['size']))
+        if buffered.geom_type == 'MultiPolygon':
+            Polygon.objects.create(geom=buffered, layer=layer)
         else:
-            Polygon.objects.create(geom=MultiPolygon(base_poly), layer=layer)
+            Polygon.objects.create(geom=MultiPolygon(buffered), layer=layer)
         return layer
 
     @staticmethod
