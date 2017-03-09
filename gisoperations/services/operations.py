@@ -10,7 +10,6 @@ class OperationsMixin(object):
     @staticmethod
     def get_layer(json):
         ds = DataSource(json)
-        lyr = ds[0]
         return ds[0]
 
     @staticmethod
@@ -81,7 +80,10 @@ class OperationsMixin(object):
         base_poly = polygon_list[0]
         for polygon in polygon_list[1:]:
             base_poly = base_poly.union(polygon)
-        Polygon.objects.create(geom=MultiPolygon(base_poly), layer=layer)
+        if base_poly.geom_type == 'MultiPolygon':
+            Polygon.objects.create(geom=base_poly, layer=layer)
+        else:
+            Polygon.objects.create(geom=MultiPolygon(base_poly), layer=layer)
         return layer
 
     @staticmethod
