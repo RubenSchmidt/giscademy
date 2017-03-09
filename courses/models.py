@@ -96,7 +96,7 @@ class Instruction(models.Model):
     description = models.TextField()
     order = models.PositiveSmallIntegerField(default=0)
     completionOperation = models.CharField(max_length=255)
-    completionArgs = JSONField(null=True)
+    completionArgs = JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.description
