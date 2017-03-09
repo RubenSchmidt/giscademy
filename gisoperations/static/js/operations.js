@@ -66,6 +66,7 @@ var gisOperationsMixin = {
                 .then(this.handleOperationResponse, this.handleErrorResponse);
 
             this.resetSelectedFeatures();
+            this.resetLayerList();
         },
         handleOperationResponse: function (response) {
 

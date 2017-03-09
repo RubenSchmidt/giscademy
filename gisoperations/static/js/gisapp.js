@@ -161,6 +161,12 @@ var GISApp = new Vue({
             }
 
         },
+        resetLayerList: function () {
+            for (var i = 0; i < this.layers.length; i++) {
+                var layer = this.layers[i];
+                layer.checked = false;
+            }
+        },
         addOrRemoveFeatureFromList: function (layer) {
             var index = this.selectedFeatures.indexOf(layer);
             if (index === -1) {
